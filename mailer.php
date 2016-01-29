@@ -50,9 +50,9 @@ class Mailer
      */
     public function send()
     {
-        $to = $this->to;
-        $subject = $this->subject;
-        $content = $this->content;
+        $to = apply_filters('cgit_postman_mail_to', $this->to);
+        $subject = apply_filters('cgit_postman_mail_subject', $this->subject);
+        $content = apply_filters('cgit_postman_mail_content', $this->content);
         $headers = $this->getHeaders();
 
         // Print email data instead of sending
@@ -80,14 +80,14 @@ class Mailer
         $items = $this->headers;
         $headers = [];
 
-        $items['From'] = $this->from;
+        $items['From'] = apply_filters('cgit_postman_mail_from', $this->from);
 
         if ($this->cc) {
-            $items['Cc'] = $this->cc;
+            $items['Cc'] = apply_filters('cgit_postman_mail_cc', $this->cc);
         }
 
         if ($this->bcc) {
-            $items['Bcc'] = $this->bcc;
+            $items['Bcc'] = apply_filters('cgit_postman_mail_bcc', $this->bcc);
         }
 
         foreach ($items as $key => $value) {

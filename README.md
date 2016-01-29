@@ -100,6 +100,16 @@ Try to submit the current form. Returns `true` if the form sends correctly or `f
 
 If the `CGIT_CONTACT_FORM_LOG` constant is defined, the plugin will use this directory to save contact form logs. If it is not, you will see a warning message on the WordPress dashboard.
 
+## Filters ##
+
+*   `cgit_postman_data` associative array of submitted form data.
+*   `cgit_postman_mail_to` mail class `to` address.
+*   `cgit_postman_mail_subject` mail class subject
+*   `cgit_postman_mail_content` mail class content
+*   `cgit_postman_mail_from` mail class `from` address
+*   `cgit_postman_mail_cc` mail class `cc` address
+*   `cgit_postman_mail_bcc` mail class `bcc` address
+
 ## Debugging ##
 
 If `CGIT_POSTMAN_MAIL_DUMP` is defined, the mail class will return the contents of the email message instead of sending it. This might save you from accidentally emailing a client or filling up your inbox.

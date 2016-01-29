@@ -162,6 +162,9 @@ class Postman
         $this->getData();
         $this->validateForm();
 
+        // Data filter
+        $this->data = apply_filters('cgit_postman_data', $this->data);
+
         if ($this->errors) {
             return false;
         }
