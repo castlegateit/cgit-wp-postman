@@ -77,24 +77,29 @@ class Mailer
      */
     private function getHeaders()
     {
-        $items = $this->headers;
-        $headers = [];
+        $headers = $this->headers;
+        $pairs = [];
 
-        $items['From'] = apply_filters('cgit_postman_mail_from', $this->from);
+        // Set From, Cc, and Bcc headers
+        $headers['From'] = apply_filters('cgit_postman_mail_from', $this->from);
 
         if ($this->cc) {
-            $items['Cc'] = apply_filters('cgit_postman_mail_cc', $this->cc);
+            $headers['Cc'] = apply_filters('cgit_postman_mail_cc', $this->cc);
         }
 
         if ($this->bcc) {
-            $items['Bcc'] = apply_filters('cgit_postman_mail_bcc', $this->bcc);
+            $headers['Bcc'] = apply_filters('cgit_postman_mail_bcc', $this->bcc);
         }
 
-        foreach ($items as $key => $value) {
-            $headers[] = $key . ': ' . $value;
+        // Filter headers
+        $headers = apply_filters('cgit_postman_mail_headers', $headers);
+
+        // Convert associative array to formatted headers
+        foreach ($headers as $key => $value) {
+            $pairs[] = $key . ': ' . $value;
         }
 
-        return implode(PHP_EOL, $headers);
+        return implode(PHP_EOL, $pairs);
     }
 
     /**

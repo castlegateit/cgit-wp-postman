@@ -103,11 +103,19 @@ If the `CGIT_CONTACT_FORM_LOG` constant is defined, the plugin will use this dir
 
 *   `cgit_postman_data` associative array of submitted form data.
 *   `cgit_postman_mail_to` mail class `to` address.
-*   `cgit_postman_mail_subject` mail class subject
-*   `cgit_postman_mail_content` mail class content
-*   `cgit_postman_mail_from` mail class `from` address
-*   `cgit_postman_mail_cc` mail class `cc` address
-*   `cgit_postman_mail_bcc` mail class `bcc` address
+*   `cgit_postman_mail_subject` mail class subject.
+*   `cgit_postman_mail_content` mail class content.
+*   `cgit_postman_mail_from` mail class `from` address.
+*   `cgit_postman_mail_cc` mail class `cc` address.
+*   `cgit_postman_mail_bcc` mail class `bcc` address.
+*   `cgit_postman_mail_headers` receives an associative array of headers.
+
+For example, the `Reply-To` header could be edited as follows:
+
+    add_filter('cgit_postman_mail_headers', function($headers) {
+        $headers['Reply-To'] = 'example@example.com';
+        return $headers;
+    });
 
 ## Debugging ##
 
