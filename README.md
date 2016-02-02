@@ -76,7 +76,6 @@ Try to submit the current form. Returns `true` if the form sends correctly or `f
         'required' => true,
         'validate' => [
             'type' => 'email',
-            'match' => 'confirm_email',
         ],
         'error' => 'Please enter a valid email address'
     ]);
@@ -89,7 +88,7 @@ Try to submit the current form. Returns `true` if the form sends correctly or `f
         ?>
         <form method="post">
             <input type="text" name="username" value="<?= $form->value('username') ?>" />
-            <input type="email" name="email" value=<?= $form->value('email') ?>" />
+            <input type="email" name="email" value="<?= $form->value('email') ?>" />
             <?= $form->error('email') ?>
             <button>Send Message</button>
         </form>
