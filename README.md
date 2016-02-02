@@ -69,7 +69,7 @@ Try to submit the current form. Returns `true` if the form sends correctly or `f
     $form->method = 'post';
     $form->errorMessage = 'That doesn\'t work';
     $form->errorTemplate = '<span>%s</span>';
-    $form->headers = [
+    $form->mailHeaders = [
         'Reply-To': 'example@example.com'
     ];
 
