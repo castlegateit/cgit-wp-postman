@@ -51,6 +51,7 @@ class Postman
     public $mailTo;
     public $mailFrom;
     public $mailSubject;
+    public $mailHeaders = [];
 
     /**
      * Conditions that must be met to submit the form
@@ -313,6 +314,7 @@ class Postman
         $mailer->from = $this->mailFrom;
         $mailer->subject = $this->mailSubject;
         $mailer->content = $this->messageContent();
+        $mailer->headers = $this->mailHeaders;
 
         return $mailer->send();
     }

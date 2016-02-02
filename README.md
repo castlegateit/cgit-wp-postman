@@ -18,9 +18,9 @@ The default error message for all form fields. This can be overridden on a per-f
 
 If it is set and if it includes the string `%s`, this will be used to format all error messages using `sprintf()`.
 
-### `Cgit\Postman->mailTo`,`Cgit\Postman->mailFrom`, and `Cgit\Postman->mailSubject` ###
+### `Cgit\Postman->mailTo`,`Cgit\Postman->mailFrom`, `Cgit\Postman->mailSubject`, and `Cgit\Postman->mailHeaders` ###
 
-The to and from email addresses and the subject used in the email. By default, the form will send to the WordPress admin email address and the subject line will be the name of the site, followed by the words "Website Enquiry".
+The to and from email addresses and the subject used in the email. By default, the form will send to the WordPress admin email address and the subject line will be the name of the site, followed by the words "Website Enquiry". Email headers are entered as an associative array, where the keys are header names.
 
 ### `Cgit\Postman->field($name, $options = [])` ###
 
@@ -69,6 +69,9 @@ Try to submit the current form. Returns `true` if the form sends correctly or `f
     $form->method = 'post';
     $form->errorMessage = 'That doesn\'t work';
     $form->errorTemplate = '<span>%s</span>';
+    $form->headers = [
+        'Reply-To': 'example@example.com'
+    ];
 
     $form->field('username');
     $form->field('email', [
