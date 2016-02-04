@@ -129,44 +129,21 @@ class Mailer
      */
     private function log()
     {
-        if (!defined(CGIT_CONTACT_FORM_LOG)) {
-            return false;
-        }
+        global $wpdb;
 
-        $dir = CGIT_CONTACT_FORM_LOG;
-        $entry = $this->logEntry();
+        $table = $wpdb->prefix . 'cgit_postman_log';
+        $user_id = get_current_user_id();
 
-        if (is_file($dir)) {
-            $dir = dirname($dir);
-        }
-
-        if (!file_exists($dir)) {
-            mkdir($dir, 0777, true);
-        }
-
-        $file = fopen($dir . '/postbox.csv', 'a');
-
-        fputcsv($file, $entry);
-    }
-
-    /**
-     * Create log entry
-     *
-     * Assemble an array of data to write to the log file, including the date
-     * and sender IP address.
-     */
-    private function logEntry()
-    {
-        $entry = [date('Y-m-d H:i')];
-
-        // Add sender IP address
-        if (isset($_SERVER['REMOTE_ADDR'])) {
-            $entry[] = $_SERVER['REMOTE_ADDR'];
-        }
-
-        // Add content
-        $entry[] = $this->content;
-
-        return $entry;
+        $wpdb->insert($table, [
+            'date' => date('Y-m-d H:i:s'),
+            'ip' => $_SERVER['REMOTE_ADDR'],
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+            'user_id' => $user_id,
+            'to' => $this->to,
+            'from' => $this->from,
+            'subject' => $this->subject,
+            'body' => $this->content,
+            'headers' => $this->getHeaders(),
+        ]);
     }
 }
