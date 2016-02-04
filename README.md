@@ -100,7 +100,7 @@ Try to submit the current form. Returns `true` if the form sends correctly or `f
 
 ## Logs ##
 
-If the `CGIT_CONTACT_FORM_LOG` constant is defined, the plugin will use this directory to save contact form logs. If it is not, you will see a warning message on the WordPress dashboard.
+The plugin will log all contact form submissions to the database.
 
 ## Filters ##
 
