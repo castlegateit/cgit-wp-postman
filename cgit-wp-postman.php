@@ -17,4 +17,5 @@ License: MIT
  */
 add_action('plugins_loaded', function() {
     require __DIR__ . '/src/autoload.php';
+    require __DIR__ . '/activation.php';
 }, 10);
