@@ -2,8 +2,8 @@
 
 namespace Cgit;
 
-use Cgit\PostmanPlugin\Validator as Validator;
-use Cgit\PostmanPlugin\Mailer as Mailer;
+use Cgit\Postman\Validator;
+use Cgit\Postman\Mailer;
 
 /**
  * Post (and get) request manager

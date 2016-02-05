@@ -1,6 +1,6 @@
 <?php
 
-namespace Cgit\PostmanPlugin;
+namespace Cgit\Postman;
 
 /**
  * Send mail
