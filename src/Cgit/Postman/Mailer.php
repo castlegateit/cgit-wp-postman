@@ -139,11 +139,11 @@ class Mailer
             'ip' => $_SERVER['REMOTE_ADDR'],
             'user_agent' => $_SERVER['HTTP_USER_AGENT'],
             'user_id' => $user_id,
-            'to' => $this->to,
-            'from' => $this->from,
-            'subject' => $this->subject,
-            'body' => $this->content,
-            'headers' => $this->getHeaders(),
+            'mail_to' => $this->to,
+            'mail_from' => $this->from,
+            'mail_subject' => $this->subject,
+            'mail_body' => $this->content,
+            'mail_headers' => $this->getHeaders(),
         ]);
     }
 }

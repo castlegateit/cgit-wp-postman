@@ -12,10 +12,7 @@ License: MIT
 
 */
 
-/**
- * Load plugin
- */
-add_action('plugins_loaded', function() {
-    require __DIR__ . '/src/autoload.php';
-    require __DIR__ . '/activation.php';
-}, 10);
+$plugin_file = __FILE__;
+
+require __DIR__ . '/src/autoload.php';
+require __DIR__ . '/activation.php';
