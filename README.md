@@ -40,6 +40,7 @@ Add a field called `$name` to the form. Various options are available:
             'function' => 'foo', // any named function
         ],
         'error' => 'Please enter a valid email address',
+        'value' => 'The default field value',
     ];
 
 Custom validation functions take the form `function($value, $data)`, where `$value` is the submitted value and `$data` is the full form data. This allows for comparisons of multiple form field values.
@@ -105,6 +106,8 @@ The plugin will log all contact form submissions to the database.
 ## Filters ##
 
 *   `cgit_postman_data` associative array of submitted form data.
+*   `cgit_postman_value_{$name}` value of field `$name`.
+*   `cgit_postman_error_{$name}` error value of field `$name`.
 *   `cgit_postman_mail_to` mail class `to` address.
 *   `cgit_postman_mail_subject` mail class subject.
 *   `cgit_postman_mail_content` mail class content.

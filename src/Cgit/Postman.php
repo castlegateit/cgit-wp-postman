@@ -116,14 +116,22 @@ class Postman
 
     /**
      * Return field value
+     *
+     * If the field has a value in the submitted data, use that value. If not,
+     * check for a default value in the field definition. Finally, apply a named
+     * filter to the value.
      */
     public function value($name)
     {
+        $value = false;
+
         if (isset($this->data[$name])) {
-            return $this->escape($this->data[$name]);
+            $value = $this->escape($this->data[$name]);
+        } elseif (isset($this->fields[$name]['value'])) {
+            $value = $this->escape($this->fields[$name]['value']);
         }
 
-        return false;
+        return apply_filters('cgit_postman_value_' . $name, $value);
     }
 
     /**
@@ -145,7 +153,7 @@ class Postman
             $error = sprintf($template, $error);
         }
 
-        return $error;
+        return apply_filters('cgit_postman_error_' . $name, $error);
     }
 
     /**
