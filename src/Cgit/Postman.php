@@ -126,10 +126,13 @@ class Postman
         $value = false;
 
         if (isset($this->data[$name])) {
-            $value = $this->escape($this->data[$name]);
+            $value = $this->data[$name];
         } elseif (isset($this->fields[$name]['value'])) {
-            $value = $this->escape($this->fields[$name]['value']);
+            $value = $this->fields[$name]['value'];
         }
+
+        // Escape value
+        $value = $this->escape($value);
 
         return apply_filters('cgit_postman_value_' . $name, $value);
     }
@@ -351,8 +354,28 @@ class Postman
     /**
      * Escape data for HTML output
      */
-    private function escape($str)
+    private function escape($data)
     {
+        if (is_array($data)) {
+            foreach ($data as &$item) {
+                $item = $this->escapeString($item);
+            }
+
+            return $data;
+        }
+
+        return $this->escapeString($data);
+    }
+
+    /**
+     * Escape string
+     */
+    private function escapeString($str)
+    {
+        if (!is_string($str)) {
+            return $str;
+        }
+
         return htmlspecialchars($str);
     }
 
