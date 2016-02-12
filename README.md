@@ -105,7 +105,9 @@ The plugin will log all contact form submissions to the database.
 
 ## Filters ##
 
-*   `cgit_postman_data` associative array of submitted form data.
+*   `cgit_postman_data_pre_validate` associative array of submitted form data, before validation.
+*   `cgit_postman_data_post_validate` associative array of submitted form data, after validation but before being sent.
+*   `cgit_postman_data` associative array of submitted form data, validated and just prior to sending.
 *   `cgit_postman_value_{$name}` value of field `$name`.
 *   `cgit_postman_error_{$name}` error value of field `$name`.
 *   `cgit_postman_mail_to` mail class `to` address.

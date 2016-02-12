@@ -172,14 +172,27 @@ class Postman
         }
 
         $this->getData();
+
+        // Filter data before validation
+        $this->data = apply_filters(
+            'cgit_postman_data_pre_validate',
+            $this->data
+        );
+
         $this->validateForm();
 
-        // Data filter
-        $this->data = apply_filters('cgit_postman_data', $this->data);
+        // Filter data after validation but before sending
+        $this->data = apply_filters(
+            'cgit_postman_data_post_validate',
+            $this->data
+        );
 
         if ($this->errors) {
             return false;
         }
+
+        // Filter data to be submitted
+        $this->data = apply_filters('cgit_postman_data', $this->data);
 
         return $this->send();
     }
