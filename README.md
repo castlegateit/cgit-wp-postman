@@ -71,7 +71,7 @@ Try to submit the current form. Returns `true` if the form sends correctly or `f
     $form->errorMessage = 'That doesn\'t work';
     $form->errorTemplate = '<span>%s</span>';
     $form->mailHeaders = [
-        'Reply-To': 'example@example.com'
+        'Reply-To' => 'example@example.com'
     ];
 
     $form->field('username');
