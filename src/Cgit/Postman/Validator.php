@@ -67,6 +67,12 @@ class Validator
         foreach ($this->rules as $name => $rule) {
             $method = $this->methodName($name);
 
+            // Check validation method exists
+            if (!method_exists($this, $method)) {
+                return trigger_error('Unknown validation method: ' . $method);
+            }
+
+            // If invalid, add validation type to array of errors
             if (!$this->$method($this->value, $rule)) {
                 $this->errors[] = $name;
             }
