@@ -26,22 +26,24 @@ The to and from email addresses and the subject used in the email. By default, t
 
 Add a field called `$name` to the form. Various options are available:
 
-    $options = [
-        'label' => 'Example', // used in the email message
-        'required' => true,
-        'validate' => [
-            'type' => 'email', // email, number, tel, url
-            'maxlength' => 20,
-            'minlength' => 4,
-            'max' => 100, // maximum value for numeric fields
-            'min' => 10, // minimum value for numeric fields
-            'pattern' => '/foo/', // a regular expression match
-            'match' => 'bar', // exactly matches another field called bar
-            'function' => 'foo', // any named function
-        ],
-        'error' => 'Please enter a valid email address',
-        'value' => 'The default field value',
-    ];
+~~~ php
+$options = [
+    'label' => 'Example', // used in the email message
+    'required' => true,
+    'validate' => [
+        'type' => 'email', // email, number, tel, url
+        'maxlength' => 20,
+        'minlength' => 4,
+        'max' => 100, // maximum value for numeric fields
+        'min' => 10, // minimum value for numeric fields
+        'pattern' => '/foo/', // a regular expression match
+        'match' => 'bar', // exactly matches another field called bar
+        'function' => 'foo', // any named function
+    ],
+    'error' => 'Please enter a valid email address',
+    'value' => 'The default field value',
+];
+~~~
 
 Custom validation functions take the form `function($value, $data)`, where `$value` is the submitted value and `$data` is the full form data. This allows for comparisons of multiple form field values.
 
@@ -65,39 +67,41 @@ Try to submit the current form. Returns `true` if the form sends correctly or `f
 
 ## Example ##
 
-    $form = new Cgit\Postman();
+~~~ php
+$form = new Cgit\Postman();
 
-    $form->method = 'post';
-    $form->errorMessage = 'That doesn\'t work';
-    $form->errorTemplate = '<span>%s</span>';
-    $form->mailHeaders = [
-        'Reply-To' => 'example@example.com'
-    ];
+$form->method = 'post';
+$form->errorMessage = 'That doesn\'t work';
+$form->errorTemplate = '<span>%s</span>';
+$form->mailHeaders = [
+    'Reply-To' => 'example@example.com'
+];
 
-    $form->field('username');
-    $form->field('email', [
-        'label' => 'Email',
-        'required' => true,
-        'validate' => [
-            'type' => 'email',
-        ],
-        'error' => 'Please enter a valid email address'
-    ]);
+$form->field('username');
+$form->field('email', [
+    'label' => 'Email',
+    'required' => true,
+    'validate' => [
+        'type' => 'email',
+    ],
+    'error' => 'Please enter a valid email address'
+]);
 
-    if ($form->submit()) {
-        ?>
-        <p>Your message has been sent</p>
-        <?php
-    } else {
-        ?>
-        <form method="post">
-            <input type="text" name="username" value="<?= $form->value('username') ?>" />
-            <input type="email" name="email" value="<?= $form->value('email') ?>" />
-            <?= $form->error('email') ?>
-            <button>Send Message</button>
-        </form>
-        <?php
-    }
+if ($form->submit()) {
+    ?>
+    <p>Your message has been sent</p>
+    <?php
+} else {
+    ?>
+    <form method="post">
+        <input type="text" name="username" value="<?= $form->value('username') ?>" />
+        <input type="email" name="email" value="<?= $form->value('email') ?>" />
+        <?= $form->error('email') ?>
+        <button>Send Message</button>
+    </form>
+    <?php
+}
+~~~
 
 ## Logs ##
 
@@ -120,10 +124,12 @@ The plugin will log all contact form submissions to the database.
 
 For example, the `Reply-To` header could be edited as follows:
 
-    add_filter('cgit_postman_mail_headers', function($headers) {
-        $headers['Reply-To'] = 'example@example.com';
-        return $headers;
-    });
+~~~ php
+add_filter('cgit_postman_mail_headers', function($headers) {
+    $headers['Reply-To'] = 'example@example.com';
+    return $headers;
+});
+~~~
 
 ## Debugging ##
 
