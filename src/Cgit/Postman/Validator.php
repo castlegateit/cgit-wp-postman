@@ -27,16 +27,22 @@ class Validator
 {
     /**
      * Value to be scrutinized
+     *
+     * @var mixed
      */
     public $value;
 
     /**
      * Validation rules
+     *
+     * @var array
      */
     public $rules;
 
     /**
      * Validation errors
+     *
+     * @var array
      */
     public $errors = [];
 
@@ -46,11 +52,18 @@ class Validator
      * An associative array of all the field names and values submitted to the
      * current form. This is required for "match" validation and can also be
      * used in custom validation functions.
+     *
+     * @var array
      */
     public $formData = [];
 
     /**
      * Constructor
+     *
+     * @param mixed $value
+     * @param array $rules
+     * @param array $data
+     * @return boolean
      */
     public function __construct($value, $rules = [], $data = [])
     {
@@ -61,11 +74,13 @@ class Validator
 
     /**
      * Is value valid?
+     *
+     * @return boolean
      */
     public function valid()
     {
         foreach ($this->rules as $name => $rule) {
-            $method = $this->methodName($name);
+            $method = self::methodName($name);
 
             // Check validation method exists
             if (!method_exists($this, $method)) {
@@ -87,6 +102,11 @@ class Validator
 
     /**
      * Is value invalid?
+     *
+     * This will return an array of error messages. If there all the fields are
+     * valid and there are no error messages, this will return an empty array.
+     *
+     * @return array
      */
     public function error()
     {
@@ -97,16 +117,22 @@ class Validator
 
     /**
      * Convert rule name into method name
+     *
+     * @param string $str
+     * @return string
      */
-    private function methodName($str)
+    protected static function methodName($str)
     {
-        return $this->camelize('is_' . $str);
+        return self::camelize('is_' . $str);
     }
 
     /**
      * Convert snake case to camel case
+     *
+     * @param string
+     * @return string
      */
-    private function camelize($str)
+    protected static function camelize($str)
     {
         return lcfirst(str_replace('_', '', ucwords($str, '_')));
     }
@@ -116,10 +142,22 @@ class Validator
      *
      * Uses other methods to check that the value is a valid email address,
      * number, telephone number, or URL.
+     *
+     * @param mixed $value
+     * @param string $type
+     * @return boolean
      */
-    private function isType($value, $type)
+    protected function isType($value, $type)
     {
-        $method = $this->methodName($type);
+        $method = self::methodName($type);
+
+        // Make sure that a validation method exists for the specified input
+        // type. Note that type validation does not make sense for text or
+        // textarea fields because values will always be returned as strings.
+        if (!method_exists($this, $method)) {
+            return trigger_error('Type validation not available for "' . $type
+                . '" input type');
+        }
 
         return $this->$method($value);
     }
@@ -129,8 +167,11 @@ class Validator
      *
      * Checks the format of the email address and performs an MX record check to
      * ensure the email address uses a valid domain.
+     *
+     * @param mixed $value
+     * @return boolean
      */
-    private function isEmail($value)
+    protected function isEmail($value)
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             return false;
@@ -148,72 +189,105 @@ class Validator
 
     /**
      * Check valid number
+     *
+     * @param mixed $value
+     * @return boolean
      */
-    private function isNumber($value)
+    protected function isNumber($value)
     {
         return is_numeric($value);
     }
 
     /**
      * Check valid telephone number
+     *
+     * @param mixed $value
+     * @return boolean
      */
-    private function isTel($value)
+    protected function isTel($value)
     {
         return preg_match('/^[0-9,\.]+$/', $value) == 1;
     }
 
     /**
      * Check valid URL
+     *
+     * @param mixed $value
+     * @return boolean
      */
-    private function isUrl($value)
+    protected function isUrl($value)
     {
         return filter_var($value, FILTER_VALIDATE_URL);
     }
 
     /**
      * Check value length against maximum length
+     *
+     * @param mixed $value
+     * @param integer $length
+     * @return boolean
      */
-    private function isMaxlength($value, $length)
+    protected function isMaxlength($value, $length)
     {
         return strlen($value) <= $length;
     }
 
     /**
      * Check value length against minimum length
+     *
+     * @param mixed $value
+     * @param integer $length
+     * @return boolean
      */
-    private function isMinlength($value, $length)
+    protected function isMinlength($value, $length)
     {
         return strlen($value) >= $length;
     }
 
     /**
      * Check value against maximum value
+     *
+     * @param mixed $value
+     * @param integer $max
+     * @return boolean
      */
-    private function isMax($value, $max)
+    protected function isMax($value, $max)
     {
         return $value <= $max;
     }
 
     /**
      * Check value against minimum value
+     *
+     * @param mixed $value
+     * @param integer $min
+     * @return boolean
      */
-    private function isMin($value, $min)
+    protected function isMin($value, $min)
     {
         return $value >= $min;
     }
 
     /**
      * Check value matches regular expression
+     *
+     * @param mixed $value
+     * @param string $pattern
+     * @return boolean
      */
-    private function isPattern($value, $pattern)
+    protected function isPattern($value, $pattern)
     {
         return preg_match($pattern, $value) == 1;
     }
 
     /**
      * Check value matches the value of another field
+     *
+     * @param mixed $value
+     * @param string $name
+     * @return boolean
      */
-    private function isMatch($value, $name)
+    protected function isMatch($value, $name)
     {
         if (!isset($this->formData[$name])) {
             return false;
@@ -227,8 +301,12 @@ class Validator
      *
      * If available, the form data are available as the second argument in the
      * named function.
+     *
+     * @param mixed $value
+     * @param callback $function
+     * @return boolean
      */
-    private function isFunction($value, $function)
+    protected function isFunction($value, $function)
     {
         if (!function_exists($function)) {
             trigger_error('Function not defined: ' . $function);

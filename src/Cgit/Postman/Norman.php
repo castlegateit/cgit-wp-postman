@@ -3,27 +3,57 @@
 namespace Cgit\Postman;
 
 /**
- * Send mail
+ * Generic mailer class
  */
-class Mailer
+class Norman
 {
     /**
-     * Email recipients
+     * Email recipient(s)
+     *
+     * @var string
      */
     public $to;
+
+    /**
+     * Email carbon copy recipient(s)
+     *
+     * @var string
+     */
     public $cc;
+
+    /**
+     * Email blind carbon copy recipient(s)
+     *
+     * @var string
+     */
     public $bcc;
 
     /**
-     * Email headers
+     * Email "From" header value
+     *
+     * @var string
      */
-    public $headers = [];
     public $from;
 
     /**
-     * Email content
+     * Associative array of additional email headers
+     *
+     * @var array
+     */
+    public $headers = [];
+
+    /**
+     * Email subject
+     *
+     * @var string
      */
     public $subject;
+
+    /**
+     * Email content
+     *
+     * @var string
+     */
     public $content;
 
     /**
@@ -31,6 +61,9 @@ class Mailer
      *
      * Accepts an associated array of properties that override the initial
      * property values for this object.
+     *
+     * @param array $args
+     * @return void
      */
     public function __construct($args = [])
     {
@@ -45,8 +78,12 @@ class Mailer
     /**
      * Send message
      *
-     * Attempts to sent the message using the wp_mail() function and attempts to
-     * write an entry in the log file.
+     * Attempts to sent the message using the wp_mail() function. Applies
+     * filters to the various properties. If the CGIT_POSTMAN_MAIL_DUMP constant
+     * is defined, the email content will be returned instead of sent (for
+     * debugging).
+     *
+     * @return mixed
      */
     public function send()
     {
@@ -61,12 +98,7 @@ class Mailer
         }
 
         // Send message
-        $result = wp_mail($to, $subject, $content, $headers);
-
-        // Log message contents
-        $this->log();
-
-        return $result;
+        return wp_mail($to, $subject, $content, $headers);
     }
 
     /**
@@ -74,8 +106,10 @@ class Mailer
      *
      * Assemble headers from associative array and $from property and return
      * correctly formatted value.
+     *
+     * @return void
      */
-    private function getHeaders()
+    protected function getHeaders()
     {
         $headers = $this->headers;
         $pairs = [];
@@ -107,43 +141,14 @@ class Mailer
      *
      * Print email data instead of sending the message for debugging. Useful if
      * you can't send email or don't want a very full inbox :)
+     *
+     * @return void
      */
     private function dump($to, $subject, $content, $headers)
     {
-        $text = '<pre>To: ' . $to . PHP_EOL;
-        $text .= 'Subject: ' . $subject . PHP_EOL;
-        $text .= 'Headers: ' . $headers . PHP_EOL;
-        $text .= 'Content: ' . str_repeat(PHP_EOL, 2) . $content . '</pre>';
-
-        echo $text;
-
-        return true;
-    }
-
-    /**
-     * Write to log file
-     *
-     * Attempts to write to the log file defined with CGIT_CONTACT_FORM_LOG. If
-     * the constant is not defined, no log file will be written. If the constant
-     * is defined but the directory does not exist, it will be created.
-     */
-    private function log()
-    {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'cgit_postman_log';
-        $user_id = get_current_user_id();
-
-        $wpdb->insert($table, [
-            'date' => date('Y-m-d H:i:s'),
-            'ip' => $_SERVER['REMOTE_ADDR'],
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
-            'user_id' => $user_id,
-            'mail_to' => $this->to,
-            'mail_from' => $this->from,
-            'mail_subject' => $this->subject,
-            'mail_body' => $this->content,
-            'mail_headers' => $this->getHeaders(),
-        ]);
+        echo '<pre>To: ' . $to . PHP_EOL
+            . 'Subject: ' . $subject . PHP_EOL
+            . $headers . PHP_EOL . PHP_EOL
+            . $content . '</pre>';
     }
 }

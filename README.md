@@ -4,30 +4,52 @@ Postman is a flexible contact form plugin for WordPress. It provides a framework
 
 ## Postman ##
 
-The `Cgit\Postman` class is used to create sets of form fields.
-
-### `Cgit\Postman->method` ###
-
-The default form method is `post`. You can set this to `get` to watch for `GET` requests instead.
-
-### `Cgit\Postman->errorMessage` ###
-
-The default error message for all form fields. This can be overridden on a per-field basis.
-
-### `Cgit\Postman->errorTemplate` ###
-
-If it is set and if it includes the string `%s`, this will be used to format all error messages using `sprintf()`.
-
-### `Cgit\Postman->mailTo`,`Cgit\Postman->mailFrom`, `Cgit\Postman->mailSubject`, and `Cgit\Postman->mailHeaders` ###
-
-The to and from email addresses and the subject used in the email. By default, the form will send to the WordPress admin email address and the subject line will be the name of the site, followed by the words "Website Enquiry". Email headers are entered as an associative array, where the keys are header names.
-
-### `Cgit\Postman->field($name, $options = [])` ###
-
-Add a field called `$name` to the form. Various options are available:
+The `Cgit\Postman` class is used to create sets of form fields. Each instance represents a separate form. Since version 2.0, the constructor requires a single argument, which is used as a unique identifier for that form:
 
 ~~~ php
-$options = [
+$postman = new \Cgit\Postman('foo');
+~~~
+
+### Properties ###
+
+The default form method is `post`. You can set this to `get` to watch for `GET` requests instead:
+
+~~~ php
+$postman->method = 'get';
+~~~
+
+The default error message for each field is "Invalid input". You can set a different error message (each field can also have its own separate error message):
+
+~~~ php
+$postman->errorMessage = 'Bad value';
+~~~
+
+By default, the error message is returned as a string. If you supply a template that includes the string `%s`, this will be used to format all error messages using `sprintf()`:
+
+~~~ php
+$postman->errorTemplate = '<span class="error">%s</span>';
+~~~
+
+You can use the `mailerSettings` property to change the email settings:
+
+~~~ php
+$postman->mailerSettings = [
+    'to' => 'example@example.com',
+    'from' => 'foo@bar.com',
+    'subject' => 'Example message',
+    'headers' => [
+        'X-Foo' => 'Example header',
+        'X-Bar' => 'Another example header',
+    ],
+];
+~~~
+
+### Methods ###
+
+Add a field, with various options:
+
+~~~ php
+$postman->field('example_name', [
     'label' => 'Example', // used in the email message
     'required' => true,
     'validate' => [
@@ -42,38 +64,28 @@ $options = [
     ],
     'error' => 'Please enter a valid email address',
     'value' => 'The default field value',
-];
+    'exclude' => true, // exclude from email message body
+]);
 ~~~
 
 Custom validation functions take the form `function($value, $data)`, where `$value` is the submitted value and `$data` is the full form data. This allows for comparisons of multiple form field values.
 
-### `Cgit\Postman->detect($conditions)` ###
+Return data for the field `$name`:
 
-Only watch for data that contains particular fields. If this is a string, it looks for a field with that name. If it is an array, it looks for all the values as field names. If it is an associative array, it looks for the key-value pairs as field-value pairs.
-
-Note that these fields and/or values need to appear in the request data (post or get), but do not have to be registered with `Cgit\Postman->field()`.
-
-### `Cgit\Postman->value($name)` ###
-
-Return the value of field `$name`.
-
-### `Cgit\Postman->error($name)` ###
-
-Return the error message for field `$name`, wrapped in the template set with `Cgit\Postman->errorTemplate`.
-
-### `Cgit\Postman->submit()` ###
-
-Try to submit the current form. Returns `true` if the form sends correctly or `false` if it does not.
+~~~ php
+$postman->value($name); // value
+$postman->error($name); // error message, within error template
+~~~
 
 ## Example ##
 
 ~~~ php
-$form = new Cgit\Postman();
+$form = new Cgit\Postman('contact');
 
 $form->method = 'post';
 $form->errorMessage = 'That doesn\'t work';
 $form->errorTemplate = '<span>%s</span>';
-$form->mailHeaders = [
+$form->mailerSettings['headers'] = [
     'Reply-To' => 'example@example.com'
 ];
 
@@ -112,6 +124,7 @@ The plugin will log all contact form submissions to the database.
 *   `cgit_postman_data_pre_validate` associative array of submitted form data, before validation.
 *   `cgit_postman_data_post_validate` associative array of submitted form data, after validation but before being sent.
 *   `cgit_postman_data` associative array of submitted form data, validated and just prior to sending.
+*   `cgit_postman_fields` associative array of all field data, just prior to sending.
 *   `cgit_postman_value_{$name}` value of field `$name`.
 *   `cgit_postman_error_{$name}` error value of field `$name`.
 *   `cgit_postman_mail_to` mail class `to` address.
@@ -131,6 +144,48 @@ add_filter('cgit_postman_mail_headers', function($headers) {
 });
 ~~~
 
+## Log file download ##
+
+Postman will add an entry in the __Tools__ menu in WordPress that allows you to download the contact form logs in CSV format. You can change how this works using filters:
+
+*   `cgit_postman_log_capability` edits the minimum user role that is required for log file downloads. The default is `edit_pages`, which means that administrators and editors can download log files.
+
+*   `cgit_postman_log_groups` edits the way the logs are grouped. The default value is `['post_id', 'form_id']`, which means that logs are grouped by both post and form ID. You can remove either of these items from the array with this filter to allow users to download logs from one form ID across all pages or from one page across all forms.
+
+*   `cgit_postman_log_aliases` provides alternative, human-readable names for form IDs. If you make it return an associative array with keys corresponding to form IDs, the values will be displayed in WordPress instead.
+
+## Custom mailer and validator ##
+
+If you want to change how the mailer or the validator work or replace them entirely, you can use the `mailer` and `validator` properties to specify different classes to use. For example, to customize the mailer for the Postman instance `$postman`:
+
+~~~ php
+use Cgit\Postman\Norman as Mailer;
+
+class Foo extends Mailer
+{
+    public function send()
+    {
+        // new send method
+    }
+}
+
+$postman->mailer = 'Foo';
+~~~
+
 ## Debugging ##
 
 If `CGIT_POSTMAN_MAIL_DUMP` is defined, the mail class will return the contents of the email message instead of sending it. This might save you from accidentally emailing a client or filling up your inbox.
+
+## Changes since version 2.0 ##
+
+*   Forms now require a unique identifier, set in the constructor. This makes submission detection automatic and allows accurate logging.
+
+*   Mailer settings have been moved from individual properties, such as `mailTo` to a single property called `mailerSettings` that consists of an array of mailer settings.
+
+*   The `detect()` method has been removed. Form identification is now automatic, based on the unique form ID set in the constructor.
+
+*   The new `exclude` field option prevents fields appearing in email messages or log downloads.
+
+*   You can now download log files from the WordPress admin panel.
+
+*   You can now change or replace the mailer and validator classes.
