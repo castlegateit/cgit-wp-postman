@@ -59,8 +59,8 @@ class Lumberjack
         $this->table = $this->database->prefix . 'cgit_postman_log';
 
         // Register the menu and update the list of logs
-        $this->update();
-        $this->register();
+        add_action('admin_menu', [$this, 'update']);
+        add_action('admin_menu', [$this, 'register']);
 
         // Download some logs
         add_action('admin_menu', [$this, 'download']);
@@ -174,7 +174,7 @@ class Lumberjack
      *
      * @return void
      */
-    private function update() {
+    public function update() {
         $this->updateGroups();
 
         $groups = implode(', ', $this->groups);
