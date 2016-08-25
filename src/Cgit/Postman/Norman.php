@@ -150,5 +150,7 @@ class Norman
             . 'Subject: ' . $subject . PHP_EOL
             . $headers . PHP_EOL . PHP_EOL
             . $content . '</pre>';
+
+        return true;
     }
 }
