@@ -106,6 +106,7 @@ if ($form->submit()) {
 } else {
     ?>
     <form method="post">
+        <input type="hidden" name="postman_form_id" value="contact" />
         <input type="text" name="username" value="<?= $form->value('username') ?>" />
         <input type="email" name="email" value="<?= $form->value('email') ?>" />
         <?= $form->error('email') ?>
