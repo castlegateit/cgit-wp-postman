@@ -156,6 +156,19 @@ class Postman
     }
 
     /**
+     * Add fields
+     *
+     * @param array $fields
+     * @return void
+     */
+    public function fields($fields)
+    {
+        foreach($fields as $name => $options) {
+            $this->field($name, $options);
+        }
+    }
+
+    /**
      * Return field value
      *
      * If the field has a value in the submitted data, use that value. If not,
