@@ -255,7 +255,7 @@ class Postman
      *
      * @return boolean
      */
-    private function submitted()
+    public function submitted()
     {
         $request = $this->request();
 
