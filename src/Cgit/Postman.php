@@ -83,6 +83,13 @@ class Postman
     public $mailerSettings = [];
 
     /**
+     * Whether the contact form has been sent out or not.
+     *
+     * @var bool
+     */
+    private $sent = false;
+
+    /**
      * Fields
      *
      * An array of fields that will be processed as part of this form. Fields
@@ -248,6 +255,16 @@ class Postman
     }
 
     /**
+    * Whether the contact form has been sent or not.
+    *
+    * @return boolean
+    */
+    public function sent()
+    {
+        return $this->sent;
+    }
+
+    /**
      * Has the form been submitted?
      *
      * If the form has been submitted, the request data (GET or POST) should
@@ -379,7 +396,7 @@ class Postman
         $this->log();
 
         // Attempt to send the message
-        return $mailer->send();
+        return $this->sent = $mailer->send();
     }
 
     /**
