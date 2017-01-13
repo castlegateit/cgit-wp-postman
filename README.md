@@ -70,6 +70,27 @@ $postman->field('example_name', [
 
 Custom validation functions take the form `function($value, $data)`, where `$value` is the submitted value and `$data` is the full form data. This allows for comparisons of multiple form field values.
 
+The `fields()` method can be used as a shortcut to add multiple fields at once, by passing in an array containing a mapping of `'name' => [ 'options' ]`:
+
+~~~ php
+$postman->fields([
+    'name' => [
+        'label' => 'Name',
+        'required' => true
+    ],
+    'phone' => [
+        'label' => 'Phone',
+        'required' => true,
+        'type' => 'tel'
+    ],
+    'email' => [
+        'label' => 'Email',
+        'required' => true,
+        'type' => 'email'
+    ]
+]);
+~~~
+
 Return data for the field `$name`:
 
 ~~~ php
