@@ -308,19 +308,26 @@ class Lumberjack
      * Is this a valid download request?
      *
      * If we are looking at the wrong page or if we have not asked to download
-     * anything or if we have not specified a post or form ID to download, do
+     * anything or if we have not specified the log to download, do
      * nothing.
      *
      * @return boolean
      */
     private function isDownload()
     {
+        // Have we adequately specified which log we want?
+        $groups_all_present = true;
+        foreach ($this->groups as $group) {
+            if (!isset($_GET[$group])) {
+                $groups_all_present = false;
+            }
+        }
+
         return isset($_GET['page']) &&
             isset($_GET['download']) &&
-            (isset($_GET['post_id']) && isset($_GET['form_id'])) &&
+            $groups_all_present &&
             $_GET['page'] == 'cgit-postman-logs';
     }
-
     /**
      * Generate download file name
      *
