@@ -194,6 +194,24 @@ class Foo extends Mailer
 $postman->mailer = 'Foo';
 ~~~
 
+## ReCaptcha Support ##
+
+Postman can optionally support recaptcha v2. If you enable this functionality you will need to ensure that RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY are defined for your environment.
+
+To enable ReCaptcha Support, simply invoke the enableCaptcha method on your form object:
+
+~~~ php
+    $form->enableCaptcha();
+~~~
+
+Postman will asyncronously load the required API itself, but you will need to position your Captcha in the markup of your form by doing the following:
+
+~~~ php
+
+<div class="g-recaptcha" data-sitekey="<?= RECAPTCHA_SITE_KEY ?>"></div>
+
+~~~
+
 ## Debugging ##
 
 If `CGIT_POSTMAN_MAIL_DUMP` is defined, the mail class will return the contents of the email message instead of sending it. This might save you from accidentally emailing a client or filling up your inbox.
