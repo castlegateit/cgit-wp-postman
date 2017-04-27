@@ -208,7 +208,7 @@ Postman will asyncronously load the required API itself, but you will need to po
 
 ~~~ php
 
-<div class="g-recaptcha" data-sitekey="<?= RECAPTCHA_SITE_KEY ?>"></div>
+    $form->renderCaptcha();
 
 ~~~
 

@@ -532,11 +532,14 @@ class Postman
         'error' => 'Please complete the recaptcha.'
         ]);
 
-
-
         if ($captcha->explainFailure) {
             $this->error[$id] = $captcha->explainFailure;
         }
+    }
+
+    public function renderCaptcha()
+    {
+        echo '<div class="g-recaptcha" data-sitekey="<?= RECAPTCHA_SITE_KEY ?>"></div>';
     }
 
     /**
