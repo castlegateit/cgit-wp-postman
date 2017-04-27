@@ -1,6 +1,7 @@
 <?php
 
 namespace Cgit\Postman;
+
 use Exception;
 
 /**
@@ -52,31 +53,32 @@ class Turing
     * @param string $id The response post key.
     */
 
-    public function register_captcha($id = 'g-recaptcha-response')
+    public function registerCaptcha($id = 'g-recaptcha-response')
     {
         echo '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
-        try
-        {
-
-            if(!defined('RECAPTCHA_SECRET_KEY') || !defined('RECAPTCHA_SITE_KEY'))
-            {
+        try {
+            if (!defined('RECAPTCHA_SECRET_KEY') || !defined('RECAPTCHA_SITE_KEY')) {
                 throw new Exception("Either the Public or Private keys are not defined. Please define RECAPTCHA_SECRET_KEY and RECAPTCHA_SITE_KEY.'");
             }
 
             $this->public_key = RECAPTCHA_SITE_KEY;
             $this->private_key = RECAPTCHA_SECRET_KEY;
-        }
-        catch(Exception $exception)
-        {
+        } catch (Exception $exception) {
             $this->explainFailure = $exception->getMessage();
             return false;
         }
-
     }
 
-    private function build_payload($submission)
-    {
+    /**
+    * Build the payload to send to the API
+    *
+    * If any of the required data is inaccessible, then return a useful error.
+    * Otherwise, return the completed payload.
+    * @param mixed $submission The submissed captcha data.
+    */
 
+    private function buildPayload($submission)
+    {
         if (empty($submission)) {
             throw new Exception("No Captcha data was found in the form submission. Please make sure you fill in the Captcha.");
         }
@@ -103,26 +105,26 @@ class Turing
      * @return mixed
      */
 
-    private function examine_response($response) {
-
+    private function examineResponse($response)
+    {
         if (empty($response)) {
             throw new Exception("No response was received. Please check that your API endpoint exists and the server can reach it.");
         }
 
         $response = json_decode($response);
 
-        var_dump($response);
+        $hostname = parse_url(get_home_url(), PHP_URL_HOST);
+        if (!isset($response->$hostname) || $response->$hostname !== $hostname) {
+            return false;
+        }
 
-        if($response->success)
-        {
+        if ($response->success) {
             return $response->success;
         }
 
 
-        if (isset($response->{'error-codes'}) && $response->{'error-codes'})
-        {
-            switch ($response->{'error-codes'})
-            {
+        if (isset($response->{'error-codes'}) && $response->{'error-codes'}) {
+            switch ($response->{'error-codes'}) {
                 case 'missing-input-secret':
                     throw new Exception("The secret key parameter is missing.");
                     break;
@@ -155,11 +157,10 @@ class Turing
      * @return mixed
      */
 
-    public function submit_recaptcha($submission, $data) {
+    public function submitRecaptcha($submission, $data)
     {
-        try
-        {
-            $payload = $this->build_payload($submission);
+        try {
+            $payload = $this->buildPayload($submission);
 
             // Construct the request to the site verification API.
 
@@ -176,23 +177,15 @@ class Turing
             // Close the connection.
             curl_close($ch);
 
-            $response = $this->examine_response($result);
+            $response = $this->examineResponse($result);
 
             return $response;
-
-        }
-
-        catch(Exception $exception)
-        {
+        } catch (Exception $exception) {
             $this->explainFailure = $exception->getMessage();
             die($exception->getMessage());
             return false;
         }
 
         return false;
-
     }
-}
-
-
 }

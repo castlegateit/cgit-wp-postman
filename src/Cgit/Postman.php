@@ -193,7 +193,7 @@ class Postman
      */
     public function fields($fields)
     {
-        foreach($fields as $name => $options) {
+        foreach ($fields as $name => $options) {
             $this->field($name, $options);
         }
     }
@@ -312,10 +312,7 @@ class Postman
     {
         $request = $this->request();
 
-        if (
-            isset($request['postman_form_id']) &&
-            $request['postman_form_id'] == $this->id
-        ) {
+        if (isset($request['postman_form_id']) && $request['postman_form_id'] == $this->id) {
             return true;
         }
 
@@ -524,21 +521,20 @@ class Postman
     {
         $this->hasCaptcha = true;
         $captcha = new $this->captcha;
-        $captcha->register_captcha($id);
+        $captcha->registerCaptcha($id);
         $this->field($id, [
         'label' => $id,
         'required' => true,
         'exclude' => true,
         'validate' => [
-            'function' => array($captcha, 'submit_recaptcha')
+            'function' => array($captcha, 'submitRecaptcha')
         ],
         'error' => 'Please complete the recaptcha.'
         ]);
 
 
 
-        if($captcha->explainFailure)
-        {
+        if ($captcha->explainFailure) {
             $this->error[$id] = $captcha->explainFailure;
         }
     }
