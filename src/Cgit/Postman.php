@@ -4,6 +4,7 @@ namespace Cgit;
 
 use Cgit\Postman\Norman;
 use Cgit\Postman\Validator;
+use Cgit\Postman\Turing;
 
 /**
  * Post request manager
@@ -39,6 +40,16 @@ class Postman
      * @var string
      */
     public $mailer = '\Cgit\Postman\Norman';
+
+    /**
+     * Captcha class
+     *
+     * The fully qualified name of the captcha class. This can be overridden to
+     * use a different class to send the email message.
+     *
+     * @var string
+     */
+    public $captcha = '\Cgit\Postman\Turing';
 
     /**
      * Form method
@@ -130,6 +141,18 @@ class Postman
      * @param string $id
      * @return void
      */
+
+    /**
+     * Whether the contact form has a captcha or not.
+     *
+     * @var bool
+     */
+    private $hasCaptcha = false;
+
+    /*
+     * Constructor
+     */
+
     public function __construct($id)
     {
         // Set form ID
@@ -170,7 +193,7 @@ class Postman
      */
     public function fields($fields)
     {
-        foreach($fields as $name => $options) {
+        foreach ($fields as $name => $options) {
             $this->field($name, $options);
         }
     }
@@ -289,10 +312,7 @@ class Postman
     {
         $request = $this->request();
 
-        if (
-            isset($request['postman_form_id']) &&
-            $request['postman_form_id'] == $this->id
-        ) {
+        if (isset($request['postman_form_id']) && $request['postman_form_id'] == $this->id) {
             return true;
         }
 
@@ -490,6 +510,36 @@ class Postman
         $str = htmlspecialchars($str);
 
         return $str;
+    }
+
+    /**
+     * Determines whether to perform Captcha logic
+     *
+     * If we're using Captcha logic, then begin that process.
+     */
+    public function enableCaptcha($id = 'g-recaptcha-response')
+    {
+        $this->hasCaptcha = true;
+        $captcha = new $this->captcha;
+        $captcha->registerCaptcha($id);
+        $this->field($id, [
+        'label' => $id,
+        'required' => true,
+        'exclude' => true,
+        'validate' => [
+            'function' => array($captcha, 'submitRecaptcha')
+        ],
+        'error' => 'Please complete the recaptcha.'
+        ]);
+
+        if ($captcha->explainFailure) {
+            $this->error[$id] = $captcha->explainFailure;
+        }
+    }
+
+    public function renderCaptcha()
+    {
+        echo '<div class="g-recaptcha" data-sitekey="<?= RECAPTCHA_SITE_KEY ?>"></div>';
     }
 
     /**
