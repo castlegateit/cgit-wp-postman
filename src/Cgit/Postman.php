@@ -508,7 +508,7 @@ class Postman
         global $post;
         global $wpdb;
 
-        $table = $wpdb->prefix . 'cgit_postman_log';
+        $table = $wpdb->base_prefix . 'cgit_postman_log';
         $opts = $this->mailerSettings;
         $post_id = isset($post->ID) ? $post->ID : 0;
         $user_id = get_current_user_id();
@@ -525,6 +525,7 @@ class Postman
         $wpdb->insert($table, [
             'date' => date('Y-m-d H:i:s'),
             'form_id' => $this->id,
+            'blog_id' => $wpdb->blogid,
             'post_id' => $post_id,
             'ip' => $_SERVER['REMOTE_ADDR'],
             'user_agent' => $_SERVER['HTTP_USER_AGENT'],

@@ -56,7 +56,7 @@ class Lumberjack
 
         // Assign the global wpdb object to a variable for convenience
         $this->database = $wpdb;
-        $this->table = $this->database->prefix . 'cgit_postman_log';
+        $this->table = $this->database->base_prefix . 'cgit_postman_log';
 
         // Register the menu and update the list of logs
         add_action('admin_menu', [$this, 'update']);
