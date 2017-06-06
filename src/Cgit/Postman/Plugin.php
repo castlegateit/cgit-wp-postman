@@ -98,9 +98,18 @@ class Plugin
      */
     public function isNetworkCompatible()
     {
-        $sample = $this->database->get_row('SELECT * FROM ' . $this->table);
+        global $wpdb;
 
-        if (array_key_exists('blog_id', $sample)) {
+        $database = DB_NAME;
+        $table = $this->table;
+        $result = $this->database->query("
+            SELECT * FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = '$database'
+            AND TABLE_NAME = '$table'
+            AND COLUMN_NAME = 'blog_id'
+        ");
+
+        if ($result) {
             return true;
         }
 
