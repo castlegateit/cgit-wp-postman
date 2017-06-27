@@ -114,7 +114,8 @@ class Turing
         $response = json_decode($response);
 
         $hostname = parse_url(get_home_url(), PHP_URL_HOST);
-        if (!isset($response->$hostname) || $response->$hostname !== $hostname) {
+        if (!isset($response->hostname) || $response->hostname !== $hostname) {
+            throw new Exception("Captcha error: the hostname does not match.");
             return false;
         }
 
