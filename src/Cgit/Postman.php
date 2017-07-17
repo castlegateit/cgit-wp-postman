@@ -147,7 +147,7 @@ class Postman
      *
      * @var bool
      */
-    private $hasCaptcha = false;
+    public $hasCaptcha = false;
 
     /*
      * Constructor
@@ -539,7 +539,7 @@ class Postman
 
     public function renderCaptcha()
     {
-        echo '<div class="g-recaptcha" data-sitekey="<?= RECAPTCHA_SITE_KEY ?>"></div>';
+        echo '<div class="g-recaptcha" data-sitekey="'.RECAPTCHA_SITE_KEY.'"></div>';
     }
 
     /**
