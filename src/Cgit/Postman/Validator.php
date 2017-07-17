@@ -310,19 +310,16 @@ class Validator
     {
 
         // If we have an array, we should treat the $function param like a method.
-        if (is_array($function))
-        {
+        if (is_array($function)) {
             $object = $function[0];
             $method = $function[1];
 
-            if (!method_exists($object, $method))
-            {
+            if (!method_exists($object, $method)) {
                 trigger_error('Method not defined: ' . $method . ' in object: ' . $object);
             }
 
             return $object->$method($value, $this->formData);
-        }
-        elseif (!function_exists($function)) {
+        } elseif (!function_exists($function)) {
             trigger_error('Function not defined: ' . $function);
         }
 
