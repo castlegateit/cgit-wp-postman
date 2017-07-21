@@ -8,13 +8,6 @@ namespace Cgit\Postman;
 class Lumberjack
 {
     /**
-     * Singleton class instance
-     *
-     * @var Plugin
-     */
-    private static $instance;
-
-    /**
      * WordPress database object
      *
      * @var \wpdb
@@ -46,11 +39,11 @@ class Lumberjack
     ];
 
     /**
-     * Private constructor
+     * Constructor
      *
      * @return void
      */
-    private function __construct()
+    public function __construct()
     {
         global $wpdb;
 
@@ -64,20 +57,6 @@ class Lumberjack
 
         // Download some logs
         add_action('admin_menu', [$this, 'download']);
-    }
-
-    /**
-     * Return the singleton class instance
-     *
-     * @return Plugin
-     */
-    public static function getInstance()
-    {
-        if (!isset(self::$instance)) {
-            self::$instance = new self;
-        }
-
-        return self::$instance;
     }
 
     /**
@@ -155,13 +134,10 @@ class Lumberjack
                     ?>
                 </table>
                 <?php
-
             } else {
-
                 ?>
                 <p><em>There are currently no log files to download. Logs will created automatically when users send messages using the forms on the site.</em></p>
                 <?php
-
             }
 
             ?>
@@ -174,7 +150,8 @@ class Lumberjack
      *
      * @return void
      */
-    public function update() {
+    public function update()
+    {
         $this->updateGroups();
 
         $groups = implode(', ', $this->groups);
@@ -409,7 +386,6 @@ class Lumberjack
     private function extract($result, $key, $values = [])
     {
         foreach (json_decode($result->field_data) as $field) {
-
             // If the field has been excluded from the message, e.g. because it
             // is a hidden field or because it is a button, do not display it in
             // the log.
