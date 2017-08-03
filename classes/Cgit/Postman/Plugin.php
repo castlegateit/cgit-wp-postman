@@ -5,13 +5,6 @@ namespace Cgit\Postman;
 class Plugin
 {
     /**
-     * Singleton class instance
-     *
-     * @var Plugin
-     */
-    private static $instance;
-
-    /**
      * Database connection
      *
      * @var wpdb
@@ -26,11 +19,11 @@ class Plugin
     private $table;
 
     /**
-     * Private constructor
+     * Constructor
      *
      * @return void
      */
-    private function __construct()
+    public function __construct()
     {
         global $wpdb;
 
@@ -39,7 +32,7 @@ class Plugin
 
         // Create database table for form submission logs
         register_activation_hook(
-            CGIT_POSTMAN_PLUGIN_FILE,
+            CGIT_POSTMAN_PLUGIN,
             [$this, 'createLogTable']
         );
 
@@ -47,21 +40,7 @@ class Plugin
         $this->checkNetworkCompatibility();
 
         // Initialize log spooler
-        Lumberjack::getInstance();
-    }
-
-    /**
-     * Return the singleton class instance
-     *
-     * @return Plugin
-     */
-    public static function getInstance()
-    {
-        if (!isset(self::$instance)) {
-            self::$instance = new self;
-        }
-
-        return self::$instance;
+        new Lumberjack;
     }
 
     /**

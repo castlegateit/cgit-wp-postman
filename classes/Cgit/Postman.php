@@ -147,7 +147,7 @@ class Postman
      *
      * @var bool
      */
-    private $hasCaptcha = false;
+    public $hasCaptcha = false;
 
     /*
      * Constructor
