@@ -301,6 +301,20 @@ class Postman
     }
 
     /**
+    * Whether the contact form has generated any errors or not.
+    *
+    * @return boolean
+    */
+    public function errors()
+    {
+        if ($this->errors) {
+            return false;
+        };
+
+        return true;
+    }
+
+    /**
      * Has the form been submitted?
      *
      * If the form has been submitted, the request data (GET or POST) should
