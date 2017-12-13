@@ -112,31 +112,71 @@ $form->mailerSettings['headers'] = [
     'Reply-To' => 'example@example.com'
 ];
 
-$form->field('username');
+// Error message form
+$form->errorTemplate = '<span class="error">%s</span>';
+
+// Define the form fields
+$form->field('username', [
+    'label' => 'Name',
+    'required' => true,
+    'error' => 'Please enter your name',
+]);
+
 $form->field('email', [
     'label' => 'Email',
     'required' => true,
+    'error' => 'Please enter a valid email address',
     'validate' => [
         'type' => 'email',
     ],
-    'error' => 'Please enter a valid email address'
 ]);
 
-if ($form->submit()) {
-    ?>
-    <p>Your message has been sent</p>
-    <?php
-} else {
-    ?>
+$form->enableCaptcha();
+?>
+
+<?php if($form->submit()) : ?>
+
+    <?php if($form->sent()) : ?>
+        <p>Thank you, your message has been sent. Someone will be in touch with you as soon as possible.</p>
+    <?php else : ?>
+
+        <?php if ($form->errors()) : ?>
+            <p>Some fields contain errors. Please check the fields below and try again.</p>
+        <?php endif; ?>
+
+    <?php endif; ?>
+<?php endif; ?>
+
+<?php if(!$form->sent()) : ?>
+
     <form method="post">
+
         <input type="hidden" name="postman_form_id" value="contact" />
-        <input type="text" name="username" value="<?= $form->value('username') ?>" />
-        <input type="email" name="email" value="<?= $form->value('email') ?>" />
-        <?= $form->error('email') ?>
-        <button>Send Message</button>
+
+        <div class="field field-half">
+            <label for="username" class="text-label">Name</label>
+            <input type="text" name="username" id="username" value="<?= $form->value('username'); ?>" class="text-input" required />
+            <?= $form->error('username'); ?>
+        </div>
+
+        <div class="field field-half">
+            <label for="email" class="text-label">Email</label>
+            <input type="email" name="email" id="email" class="text-input" value="<?= $form->value('email'); ?>" required />
+            <?= $form->error('email'); ?>
+        </div>
+
+        <div class="field">
+            <?php $form->renderCaptcha(); ?>
+            <?= $form->error('g-recaptcha-response'); ?>
+        </div>
+
+        <div class="field submit">
+            <button class="button">Send Message</button>
+        </div>
+
     </form>
-    <?php
-}
+
+<?php endif; ?>
 ~~~
 
 ## Logs ##
