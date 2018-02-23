@@ -70,6 +70,22 @@ $postman->field('example_name', [
 
 Custom validation is available for 'url', 'tel', 'number'. All other fields are treated as text inputs, though custom validation functions may be added. These take the form `function($value, $data)`, where `$value` is the submitted value and `$data` is the full form data. This allows for comparisons of multiple form field values.
 
+You can specify separate error messages for different validation errors using an array instead of a string for the error parameter:
+
+~~~ php
+$postman->field('example_name', [
+    'validate' => [
+        'type' => 'email',
+        'maxlength' => 10,
+    ],
+    'error' => [
+        'required' => 'This is a required field',
+        'type' => 'Please enter a valid email address',
+        'maxlength' => 'Must have 10 characters or fewer',
+    ],
+]);
+~~~
+
 The `fields()` method can be used as a shortcut to add multiple fields at once, by passing in an array containing a mapping of `'name' => [ 'options' ]`:
 
 ~~~ php

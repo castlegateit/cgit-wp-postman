@@ -392,36 +392,78 @@ class Postman
      */
     private function validate($name)
     {
-        // Make sure no array keys are missing
-        $defaults = [
-            'error' => $this->errorMessage,
-            'required' => false,
-            'validate' => false
-        ];
-
-        $opts = array_merge($defaults, $this->fields[$name]);
+        $opts = $this->getFieldOptions($this->fields[$name]);
+        $messages = $this->getErrorMessages($opts);
 
         // Get field value
         $value = $this->value($name);
 
         // Check required fields have values
         if ($opts['required'] && !$value) {
-            $this->errors[$name] = $opts['error'];
+            $this->errors[$name] = $messages['required'];
         }
 
         // Validate field values
         if ($value && $opts['validate']) {
-            $validator_class = $this->validator;
-            $validator = new $validator_class(
-                $value,
-                $opts['validate'],
-                $this->data
-            );
+            $class = $this->validator;
+            $validator = new $class($value, $opts['validate'], $this->data);
+            $errors = $validator->error();
 
-            if ($validator->error()) {
-                $this->errors[$name] = $opts['error'];
+            if ($errors) {
+                $key = end($errors);
+                $message = $messages['required'];
+
+                // Is there a specific validation error message for this
+                // particular type of error?
+                if (array_key_exists($key, $messages)) {
+                    $message = $messages[$key];
+                }
+
+                $this->errors[$name] = $message;
             }
         }
+    }
+
+    /**
+     * Generate sanitized field options
+     *
+     * @param array $options
+     * @return array
+     */
+    private function getFieldOptions($options)
+    {
+        return array_merge([
+            'error' => $this->errorMessage,
+            'required' => false,
+            'validate' => false
+        ], $options);
+    }
+
+    /**
+     * Generate sanitized error messages
+     *
+     * @param array $options
+     * @return array
+     */
+    private function getErrorMessages($options)
+    {
+        $messages = $options['error'];
+
+        if (!is_array($options['error'])) {
+            $messages = ['required' => $messages];
+        }
+
+        return array_merge([
+            'required' => $messages['required'],
+            'type' => $messages['required'],
+            'maxlength' => $messages['required'],
+            'minlength' => $messages['required'],
+            'max' => $messages['required'],
+            'min' => $messages['required'],
+            'pattern' => $messages['required'],
+            'match' => $messages['required'],
+            'function' => $messages['required'],
+        ], $messages);
     }
 
     /**
