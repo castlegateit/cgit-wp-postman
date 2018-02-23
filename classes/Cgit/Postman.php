@@ -646,7 +646,6 @@ class Postman
             'form_id' => $this->id,
             'blog_id' => $wpdb->blogid,
             'post_id' => $post_id,
-            'ip' => $_SERVER['REMOTE_ADDR'],
             'user_agent' => $_SERVER['HTTP_USER_AGENT'],
             'user_id' => $user_id,
             'mail_to' => $opts['to'],
