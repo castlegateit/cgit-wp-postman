@@ -39,6 +39,13 @@ class Lumberjack
     ];
 
     /**
+     * Number of log entries deleted
+     *
+     * @var integer
+     */
+    private $deleted = null;
+
+    /**
      * Constructor
      *
      * @return void
@@ -57,6 +64,9 @@ class Lumberjack
 
         // Download some logs
         add_action('admin_menu', [$this, 'download']);
+
+        // Clean up some logs
+        add_action('admin_init', [$this, 'clean']);
     }
 
     /**
@@ -133,10 +143,36 @@ class Lumberjack
 
                     ?>
                 </table>
+
+                <h3>Delete logs</h3>
+
+                <form action="" method="post">
+                    <input type="hidden" name="postman_delete_logs" value="limit" />
+                    <p>Delete all except the latest <input type="number" name="postman_log_limit" placeholder="100" /> log entries <button type="submit" class="button">Delete</button></p>
+                </form>
+
+                <form action="" method="post">
+                    <input type="hidden" name="postman_delete_logs" value="days" />
+                    <p>Delete all except the latest <input type="text" name="postman_log_limit_days" placeholder="30" /> days of log entries <button type="submit" class="button">Delete</button></p>
+                </form>
+
+                <form action="" method="post">
+                    <input type="hidden" name="postman_delete_logs" value="all" />
+                    <p>Delete all logs <button type="submit" class="button">Delete</button></p>
+                </form>
+
                 <?php
+
+                if (!is_null($this->deleted)) {
+                    $noun = $this->deleted == 1 ? 'entry' : 'entries';
+
+                    ?>
+                    <p><i>Deleted <?= $this->deleted ?> log <?= $noun ?>.</i></p>
+                    <?php
+                }
             } else {
                 ?>
-                <p><em>There are currently no log files to download. Logs will created automatically when users send messages using the forms on the site.</em></p>
+                <p><em>There are currently no log files to download. Logs will be created automatically when users send messages using the forms on the site.</em></p>
                 <?php
             }
 
@@ -406,5 +442,109 @@ class Lumberjack
         }
 
         return $values;
+    }
+
+    /**
+     * Clean up logs
+     *
+     * If relevant constants have been set or if a clean up has been requested
+     * from the admin panel, remove old log files.
+     *
+     * @return void
+     */
+    public function clean()
+    {
+        $wpdb = $this->database;
+        $table = $this->table;
+
+        $this->deleteExcept();
+        $this->deleteExceptDays();
+        $this->deleteAll();
+    }
+
+    /**
+     * Delete logs except n entries
+     *
+     * @return void
+     */
+    private function deleteExcept()
+    {
+        $database = $this->database;
+        $table = $this->table;
+        $key = 'postman_delete_logs';
+        $limit = null;
+
+        if (defined('CGIT_POSTMAN_LOG_LIMIT')) {
+            $limit = CGIT_POSTMAN_LOG_LIMIT;
+        }
+
+        if (isset($_POST[$key]) && $_POST[$key] == 'limit') {
+            $limit = $_POST['postman_log_limit'];
+        }
+
+        if (is_null($limit)) {
+            return;
+        }
+
+        $this->deleted = $database->query("DELETE FROM $table
+            WHERE id NOT IN
+                (SELECT id FROM
+                    (SELECT id FROM $table
+                        ORDER BY date DESC
+                        LIMIT $limit) x)");
+    }
+
+    /**
+     * Delete logs except n most recent days
+     *
+     * @return void
+     */
+    private function deleteExceptDays()
+    {
+        $database = $this->database;
+        $table = $this->table;
+        $key = 'postman_delete_logs';
+        $days = null;
+
+        if (defined('CGIT_POSTMAN_LOG_LIMIT_DAYS')) {
+            $days = CGIT_POSTMAN_LOG_LIMIT_DAYS;
+        }
+
+        if (isset($_POST[$key]) && $_POST[$key] == 'days') {
+            $days = $_POST['postman_log_limit_days'];
+        }
+
+        if (is_null($days)) {
+            return;
+        }
+
+        $date = new DateTime;
+        $date->modify('-' . $days . ' days');
+        $sql_date = $date->format('Y-m-d H:i:s');
+
+        $this->deleted = $wpdb->query("DELETE FROM $table
+            WHERE date < '$sql_date'");
+    }
+
+    /**
+     * Delete all logs
+     *
+     * @return void
+     */
+    private function deleteAll()
+    {
+        $database = $this->database;
+        $table = $this->table;
+        $con = 'CGIT_POSTMAN_LOG_DELETE_ALL';
+        $key ='postman_delete_logs';
+
+        $has_con = defined($con) && constant($con);
+        $has_key = isset($_POST[$key]) && $_POST[$key] == 'all';
+
+        if (!$has_con && !$has_key) {
+            return;
+        }
+
+        $this->deleted = $database->query("DELETE FROM $table");
     }
 }

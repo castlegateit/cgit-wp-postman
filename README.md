@@ -234,6 +234,18 @@ Postman will add an entry in the __Tools__ menu in WordPress that allows you to 
 
 *   `cgit_postman_log_aliases` provides alternative, human-readable names for form IDs. If you make it return an associative array with keys corresponding to form IDs, the values will be displayed in WordPress instead.
 
+## Deleting logs ##
+
+You can also use the __Tools__ menu to delete old log files. If there are currently log entries in the database, you will be able to delete logs by number or date or to delete all logs. This process can be automated by setting one or more constants in `wp-config.php`:
+
+~~~ php
+define('CGIT_POSTMAN_LOG_LIMIT', 100); // keep the most recent 100 logs
+define('CGIT_POSTMAN_LOG_LIMIT_DAYS', 30); // keep the most recent 30 days logs
+define('CGIT_POSTMAN_LOG_DELETE_ALL', true); // delete all logs
+~~~
+
+If these constants are set, the deletion process will take place when a user accesses the Wordpress admin panel.
+
 ## Custom mailer and validator ##
 
 If you want to change how the mailer or the validator work or replace them entirely, you can use the `mailer` and `validator` properties to specify different classes to use. For example, to customize the mailer for the Postman instance `$postman`:
