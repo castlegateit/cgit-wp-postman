@@ -255,6 +255,7 @@ class Lumberjack
         // Add CSV headers
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $name . '.csv"');
+        header('Cache-Control: private');
 
         // Extract the log data from the database and convert it to CSV format
         $results = $this->database->get_results("
