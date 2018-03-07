@@ -79,16 +79,11 @@ class Plugin
     {
         global $wpdb;
 
-        $database = DB_NAME;
         $table = $this->table;
-        $result = $this->database->query("
-            SELECT * FROM information_schema.COLUMNS
-            WHERE TABLE_SCHEMA = '$database'
-            AND TABLE_NAME = '$table'
-            AND COLUMN_NAME = 'blog_id'
-        ");
+        $results = $wpdb->get_results("SHOW COLUMNS FROM $table
+            LIKE 'blog_id'");
 
-        if ($result) {
+        if ($results) {
             return true;
         }
 
