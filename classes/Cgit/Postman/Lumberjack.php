@@ -66,7 +66,8 @@ class Lumberjack
         add_action('admin_menu', [$this, 'download']);
 
         // Clean up some logs
-        add_action('admin_init', [$this, 'clean']);
+        add_action('init', [$this, 'clean']);
+       
     }
 
     /**
@@ -474,6 +475,10 @@ class Lumberjack
         $key = 'postman_delete_logs';
         $limit = null;
 
+        if(!defined('CGIT_POSTMAN_LOG_LIMIT')) {
+            $limit = 180;
+        }
+      
         if (defined('CGIT_POSTMAN_LOG_LIMIT')) {
             $limit = CGIT_POSTMAN_LOG_LIMIT;
         }

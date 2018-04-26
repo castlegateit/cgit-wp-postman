@@ -236,6 +236,9 @@ Postman will add an entry in the __Tools__ menu in WordPress that allows you to 
 
 ## Deleting logs ##
 
+As of version **2.8.2** Postman will automatically truncate log files older than 180 days (an averaged 6 months). You can override this by looking at the contents below.
+Do not activate a version of Postman later than **2.8.1** without defining the appropriate constant if you do not want this to happen!  
+
 You can also use the __Tools__ menu to delete old log files. If there are currently log entries in the database, you will be able to delete logs by number or date or to delete all logs. This process can be automated by setting one or more constants in `wp-config.php`:
 
 ~~~ php
