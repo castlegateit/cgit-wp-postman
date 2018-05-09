@@ -308,10 +308,10 @@ class Postman
     public function errors()
     {
         if ($this->errors) {
-            return false;
+            return true;
         };
 
-        return true;
+        return false;
     }
 
     /**
