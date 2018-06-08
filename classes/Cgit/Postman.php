@@ -307,11 +307,7 @@ class Postman
     */
     public function errors()
     {
-        if ($this->errors) {
-            return false;
-        };
-
-        return true;
+        return (bool) $this->errors;
     }
 
     /**

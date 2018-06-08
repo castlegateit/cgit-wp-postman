@@ -5,7 +5,7 @@
 Plugin Name: Castlegate IT WP Postman
 Plugin URI: http://github.com/castlegateit/cgit-wp-postman
 Description: Flexible contact form plugin for WordPress.
-Version: 2.8.2
+Version: 2.8.3
 Author: Castlegate IT
 Author URI: http://www.castlegateit.co.uk/
 License: MIT
