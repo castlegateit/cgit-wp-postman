@@ -92,6 +92,12 @@ class Norman
         $content = apply_filters('cgit_postman_mail_content', $this->content);
         $headers = $this->getHeaders();
 
+        // If recipient is null, do not send a message but do consider the
+        // operation a success.
+        if (is_null($to)) {
+            return true;
+        }
+
         // Print email data instead of sending
         if (defined('CGIT_POSTMAN_MAIL_DUMP') && CGIT_POSTMAN_MAIL_DUMP) {
             return $this->dump($to, $subject, $content, $headers);
