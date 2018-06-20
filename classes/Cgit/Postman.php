@@ -512,7 +512,8 @@ class Postman
             $sections[] = $label . ': ' . self::sanitize($value);
         }
 
-        return implode(str_repeat(PHP_EOL, 2), $sections);
+        return apply_filters('cgit_postman_message_content',
+            implode(str_repeat(PHP_EOL, 2), $sections), $this->id);
     }
 
     /**
