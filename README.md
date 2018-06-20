@@ -201,12 +201,13 @@ The plugin will log all contact form submissions to the database.
 
 ## Filters ##
 
-*   `cgit_postman_data_pre_validate` associative array of submitted form data, before validation.
-*   `cgit_postman_data_post_validate` associative array of submitted form data, after validation but before being sent.
-*   `cgit_postman_data` associative array of submitted form data, validated and just prior to sending.
-*   `cgit_postman_fields` associative array of all field data, just prior to sending.
-*   `cgit_postman_value_{$name}` value of field `$name`.
-*   `cgit_postman_error_{$name}` error value of field `$name`.
+*   `cgit_postman_data_pre_validate` associative array of submitted form data, before validation.*
+*   `cgit_postman_data_post_validate` associative array of submitted form data, after validation but before being sent.*
+*   `cgit_postman_data` associative array of submitted form data, validated and just prior to sending.*
+*   `cgit_postman_fields` associative array of all field data, just prior to sending.*
+*   `cgit_postman_value_{$name}` value of field `$name`.*
+*   `cgit_postman_error_{$name}` error value of field `$name`.*
+*   `cgit_postman_message_content` assembled email content.*
 *   `cgit_postman_mail_to` mail class `to` address.
 *   `cgit_postman_mail_subject` mail class subject.
 *   `cgit_postman_mail_content` mail class content.
@@ -224,6 +225,20 @@ add_filter('cgit_postman_mail_headers', function($headers) {
 });
 ~~~
 
+The filters marked with an asterisk accept the form ID as a second parameter so you can distinguish between different forms when filtering data. For example:
+
+~~~ php
+add_filter('cgit_postman_data', function ($data, $form_id) {
+    if ($form_id != 'contact_form') {
+        return $data;
+    }
+
+    // do something to data here
+
+    return $data;
+});
+~~~
+
 ## Log file download ##
 
 Postman will add an entry in the __Tools__ menu in WordPress that allows you to download the contact form logs in CSV format. You can change how this works using filters:
@@ -237,7 +252,7 @@ Postman will add an entry in the __Tools__ menu in WordPress that allows you to 
 ## Deleting logs ##
 
 As of version **2.8.2** Postman will automatically truncate log files older than 180 days (an averaged 6 months). You can override this by looking at the contents below.
-Do not activate a version of Postman later than **2.8.1** without defining the appropriate constant if you do not want this to happen!  
+Do not activate a version of Postman later than **2.8.1** without defining the appropriate constant if you do not want this to happen!
 
 You can also use the __Tools__ menu to delete old log files. If there are currently log entries in the database, you will be able to delete logs by number or date or to delete all logs. This process can be automated by setting one or more constants in `wp-config.php`:
 
