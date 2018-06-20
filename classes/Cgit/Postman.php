@@ -505,19 +505,11 @@ class Postman
 
             $label = isset($field['label']) ? $field['label'] : $key;
 
-            if (is_array($value))
-            {
-                $line = [];
-                foreach ($value as $v)
-                {
-                    $line[] = self::sanitize($v);
-                }
-                $sections[] = $label . ': ' . implode(', ', $line);
+            if (is_array($value)) {
+                $value = implode(', ', $value);
             }
-            else
-            {
-                $sections[] = $label . ': ' . self::sanitize($value);
-            }
+
+            $sections[] = $label . ': ' . self::sanitize($value);
         }
 
         return implode(str_repeat(PHP_EOL, 2), $sections);
