@@ -221,7 +221,7 @@ class Postman
         // Escape value
         $value = self::escape($value);
 
-        return apply_filters('cgit_postman_value_' . $name, $value);
+        return apply_filters('cgit_postman_value_' . $name, $value, $this->id);
     }
 
     /**
@@ -246,7 +246,7 @@ class Postman
             $error = sprintf($template, $error);
         }
 
-        return apply_filters('cgit_postman_error_' . $name, $error);
+        return apply_filters('cgit_postman_error_' . $name, $error, $this->id);
     }
 
     /**
@@ -266,26 +266,20 @@ class Postman
         $this->updateData();
 
         // Filter data before validation
-        $this->data = apply_filters(
-            'cgit_postman_data_pre_validate',
-            $this->data
-        );
+        $this->data = apply_filters('cgit_postman_data_pre_validate', $this->data, $this->id);
 
         $this->validateForm();
 
         // Filter data after validation but before sending
-        $this->data = apply_filters(
-            'cgit_postman_data_post_validate',
-            $this->data
-        );
+        $this->data = apply_filters('cgit_postman_data_post_validate', $this->data, $this->id);
 
         if ($this->errors) {
             return false;
         }
 
         // Filter data and fields before sending
-        $this->data = apply_filters('cgit_postman_data', $this->data);
-        $this->fields = apply_filters('cgit_postman_fields', $this->fields);
+        $this->data = apply_filters('cgit_postman_data', $this->data, $this->id);
+        $this->fields = apply_filters('cgit_postman_fields', $this->fields, $this->id);
 
         return $this->send();
     }
