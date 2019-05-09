@@ -8,7 +8,7 @@ Description: Flexible contact form plugin for WordPress.
 Version: 2.8.5
 Author: Castlegate IT
 Author URI: http://www.castlegateit.co.uk/
-License: MIT
+License: AGPL
 
 */
 
