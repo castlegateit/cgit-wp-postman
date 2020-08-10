@@ -159,10 +159,14 @@ class Postman
         $this->id = $id;
 
         // Set default mailer options
-        $domain = strtolower($_SERVER['SERVER_NAME']);
+        $domain = 'example.com';
 
-        if (substr($domain, 0, 4) == 'www.') {
-            $domain = substr($domain, 4);
+        if (isset($_SERVER['SERVER_NAME'])) {
+            $domain = strtolower($_SERVER['SERVER_NAME']);
+
+            if (substr($domain, 0, 4) == 'www.') {
+                $domain = substr($domain, 4);
+            }
         }
 
         $this->mailerSettings = [
@@ -623,13 +627,20 @@ class Postman
             $pairs[] = $key . ': ' . $value;
         }
 
+        // Set user agent string
+        $user_agent = '';
+
+        if (isset($_SERVER['HTTP_USER_AGENT'])) {
+            $user_agent = $_SERVER['HTTP_USER_AGENT'];
+        }
+
         // Add row to database
         $wpdb->insert($table, [
             'date' => date('Y-m-d H:i:s'),
             'form_id' => $this->id,
             'blog_id' => $wpdb->blogid,
             'post_id' => $post_id,
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+            'user_agent' => $user_agent,
             'user_id' => $user_id,
             'mail_to' => $opts['to'],
             'mail_from' => $opts['from'],
