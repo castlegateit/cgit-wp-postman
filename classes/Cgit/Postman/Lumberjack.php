@@ -67,7 +67,6 @@ class Lumberjack
 
         // Clean up some logs
         add_action('init', [$this, 'clean']);
-       
     }
 
     /**
@@ -475,10 +474,6 @@ class Lumberjack
         $key = 'postman_delete_logs';
         $limit = null;
 
-        if(!defined('CGIT_POSTMAN_LOG_LIMIT')) {
-            $limit = 180;
-        }
-      
         if (defined('CGIT_POSTMAN_LOG_LIMIT')) {
             $limit = CGIT_POSTMAN_LOG_LIMIT;
         }
@@ -500,7 +495,7 @@ class Lumberjack
     }
 
     /**
-     * Delete logs except n most recent days
+     * Delete logs except n most recent days (default 180)
      *
      * @return void
      */
@@ -509,7 +504,7 @@ class Lumberjack
         $database = $this->database;
         $table = $this->table;
         $key = 'postman_delete_logs';
-        $days = null;
+        $days = 180;
 
         if (defined('CGIT_POSTMAN_LOG_LIMIT_DAYS')) {
             $days = CGIT_POSTMAN_LOG_LIMIT_DAYS;
