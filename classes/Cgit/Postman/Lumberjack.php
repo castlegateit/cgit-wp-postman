@@ -522,7 +522,7 @@ class Lumberjack
         $date->modify('-' . $days . ' days');
         $sql_date = $date->format('Y-m-d H:i:s');
 
-        $this->deleted = $wpdb->query("DELETE FROM $table
+        $this->deleted = $this->database->query("DELETE FROM $table
             WHERE date < '$sql_date'");
     }
 
