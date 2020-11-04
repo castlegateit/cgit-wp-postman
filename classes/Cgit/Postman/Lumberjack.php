@@ -518,7 +518,7 @@ class Lumberjack
             return;
         }
 
-        $date = new DateTime;
+        $date = new \DateTime;
         $date->modify('-' . $days . ' days');
         $sql_date = $date->format('Y-m-d H:i:s');
 
