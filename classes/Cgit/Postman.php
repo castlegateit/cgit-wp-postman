@@ -2,6 +2,7 @@
 
 namespace Cgit;
 
+use Cgit\Postman\Name;
 use Cgit\Postman\Norman;
 use Cgit\Postman\Validator;
 use Cgit\Postman\Turing;
@@ -186,6 +187,12 @@ class Postman
      */
     public function field($name, $options = [])
     {
+        if (Name::isReserved($name)) {
+            trigger_error("Cannot use reserved field name \"$name\"", E_USER_WARNING);
+
+            return;
+        }
+
         $this->fields[$name] = $options;
     }
 
