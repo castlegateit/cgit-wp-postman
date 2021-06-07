@@ -480,7 +480,7 @@ class Postman
         // Create a new mailer
         $mailer_class = $this->mailer;
         $mailer = new $mailer_class($this->mailerSettings);
-        $mailer->content = $this->messageContent();
+        $mailer->content = html_entity_decode($this->messageContent());
 
         // Save entry in the log table in the database
         $this->log();
