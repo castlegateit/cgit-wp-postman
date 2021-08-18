@@ -34,7 +34,6 @@ class Lumberjack
      * @var array
      */
     private $groups = [
-        'post_id',
         'form_id',
     ];
 

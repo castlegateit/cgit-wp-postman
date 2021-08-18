@@ -245,7 +245,7 @@ Postman will add an entry in the __Tools__ menu in WordPress that allows you to 
 
 *   `cgit_postman_log_capability` edits the minimum user role that is required for log file downloads. The default is `edit_pages`, which means that administrators and editors can download log files.
 
-*   `cgit_postman_log_groups` edits the way the logs are grouped. The default value is `['post_id', 'form_id']`, which means that logs are grouped by both post and form ID. You can remove either of these items from the array with this filter to allow users to download logs from one form ID across all pages or from one page across all forms.
+*   `cgit_postman_log_groups` edits the way the logs are grouped. The default value is `['form_id']`, which means that logs are grouped by form ID.
 
 *   `cgit_postman_log_aliases` provides alternative, human-readable names for form IDs. If you make it return an associative array with keys corresponding to form IDs, the values will be displayed in WordPress instead.
 
