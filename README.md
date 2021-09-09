@@ -264,24 +264,6 @@ define('CGIT_POSTMAN_LOG_DELETE_ALL', true); // delete all logs
 
 If these constants are set, the deletion process will take place when a user accesses the Wordpress admin panel.
 
-## Custom mailer and validator ##
-
-If you want to change how the mailer or the validator work or replace them entirely, you can use the `mailer` and `validator` properties to specify different classes to use. For example, to customize the mailer for the Postman instance `$postman`:
-
-~~~ php
-use Cgit\Postman\Norman as Mailer;
-
-class Foo extends Mailer
-{
-    public function send()
-    {
-        // new send method
-    }
-}
-
-$postman->mailer = 'Foo';
-~~~
-
 ## ReCaptcha Support ##
 
 Postman can optionally support recaptcha v2. If you enable this functionality you will need to ensure that RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY are defined for your environment.
@@ -289,15 +271,13 @@ Postman can optionally support recaptcha v2. If you enable this functionality yo
 To enable ReCaptcha Support, simply invoke the enableCaptcha method on your form object:
 
 ~~~ php
-    $form->enableCaptcha();
+$form->enableCaptcha();
 ~~~
 
 Postman will asyncronously load the required API itself, but you will need to position your Captcha in the markup of your form by doing the following:
 
 ~~~ php
-
-    $form->renderCaptcha();
-
+$form->renderCaptcha();
 ~~~
 
 ## Debugging ##

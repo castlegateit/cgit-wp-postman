@@ -7,7 +7,7 @@ use Exception;
 /**
  * Captcha handler class
  */
-class Turing
+class Captcha
 {
 
     /**

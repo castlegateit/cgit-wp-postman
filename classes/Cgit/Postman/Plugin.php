@@ -40,7 +40,7 @@ class Plugin
         $this->checkNetworkCompatibility();
 
         // Initialize log spooler
-        new Lumberjack;
+        new LogManager();
     }
 
     /**

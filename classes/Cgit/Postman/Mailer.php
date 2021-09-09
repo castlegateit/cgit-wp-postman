@@ -5,7 +5,7 @@ namespace Cgit\Postman;
 /**
  * Generic mailer class
  */
-class Norman
+class Mailer
 {
     /**
      * Email recipient(s)

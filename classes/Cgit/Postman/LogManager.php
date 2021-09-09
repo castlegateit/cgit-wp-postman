@@ -5,7 +5,7 @@ namespace Cgit\Postman;
 /**
  * Log processing
  */
-class Lumberjack
+class LogManager
 {
     /**
      * WordPress database object

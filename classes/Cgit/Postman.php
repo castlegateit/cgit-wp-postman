@@ -3,9 +3,9 @@
 namespace Cgit;
 
 use Cgit\Postman\Name;
-use Cgit\Postman\Norman;
+use Cgit\Postman\Mailer;
 use Cgit\Postman\Validator;
-use Cgit\Postman\Turing;
+use Cgit\Postman\Captcha;
 
 /**
  * Post request manager
@@ -21,36 +21,6 @@ class Postman
      * @var string
      */
     public $id;
-
-    /**
-     * Validator class
-     *
-     * The fully qualified name of the validator class. This can be overridden
-     * to use a different class to validate each field.
-     *
-     * @var string
-     */
-    public $validator = '\Cgit\Postman\Validator';
-
-    /**
-     * Mailer class
-     *
-     * The fully qualified name of the mailer class. This can be overridden to
-     * use a different class to send the email message.
-     *
-     * @var string
-     */
-    public $mailer = '\Cgit\Postman\Norman';
-
-    /**
-     * Captcha class
-     *
-     * The fully qualified name of the captcha class. This can be overridden to
-     * use a different class to send the email message.
-     *
-     * @var string
-     */
-    public $captcha = '\Cgit\Postman\Turing';
 
     /**
      * Form method
@@ -88,7 +58,7 @@ class Postman
      * Default mailer settings
      *
      * An associative array of options that can be passed to the constructor of
-     * the Norman mailer class.
+     * the Mailer class.
      *
      * @var array
      */
@@ -406,8 +376,7 @@ class Postman
 
         // Validate field values
         if ($value && $opts['validate']) {
-            $class = $this->validator;
-            $validator = new $class($value, $opts['validate'], $this->data);
+            $validator = new Validator($value, $opts['validate'], $this->data);
             $errors = $validator->error();
 
             if ($errors) {
@@ -470,7 +439,7 @@ class Postman
     /**
      * Send message
      *
-     * Attempt to send the message using the Normal mailer class and save a copy
+     * Attempt to send the message using the Mailer class and save a copy
      * of the data in the log table in the database.
      *
      * @return boolean
@@ -478,8 +447,7 @@ class Postman
     private function send()
     {
         // Create a new mailer
-        $mailer_class = $this->mailer;
-        $mailer = new $mailer_class($this->mailerSettings);
+        $mailer = new Mailer($this->mailerSettings);
         $mailer->content = html_entity_decode($this->messageContent());
 
         // Save entry in the log table in the database
@@ -583,7 +551,7 @@ class Postman
     public function enableCaptcha($id = 'g-recaptcha-response')
     {
         $this->hasCaptcha = true;
-        $captcha = new $this->captcha;
+        $captcha = new Captcha();
         $captcha->registerCaptcha($id);
         $this->field($id, [
         'label' => $id,
