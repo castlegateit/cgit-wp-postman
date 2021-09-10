@@ -195,9 +195,114 @@ $form->enableCaptcha();
 <?php endif; ?>
 ~~~
 
+
+## Akismet
+
+Postman can check form submissions for spam using the [Akismet](https://akismet.com/) service. For this to work, you must first install and activate the [WordPress Akismet plugin](https://wordpress.org/plugins/akismet/) with a valid license key.
+
+When Akismet is active and registered, you can enable Akismet support using the `enableAkismet` method on the `Postman` form instance:
+
+~~~ php
+$form = new \Cgit\Postman('contact');
+
+$form->fields([
+    'fullname' => [],
+    'email' => [],
+    'subject' => [],
+    'message' => [],
+]);
+
+$form->enableAkismet('contact-form', [
+    'comment_author' => 'fullname',
+    'comment_author_email' => 'email',
+    'comment_content' => [
+        'subject',
+        'message',
+    ],
+]);
+~~~
+
+The first parameter is the type of form submission and must one of the following [Akismet comment types](https://akismet.com/development/api/#comment-check):
+
+*   `blog-post`
+*   `comment`
+*   `contact-form`
+*   `forum-post`
+*   `message`
+*   `reply`
+*   `signup`
+
+The second parameter is an array that maps the Postman fields to the relevant [Akismet fields](https://akismet.com/development/api/#comment-check). You can combine multiple Postman fields into one Akismet field by providing an array of Postman field names instead of a single field name. The following Akismet fields are supported:
+
+*   `comment_author`
+*   `comment_author_email`
+*   `comment_author_url`
+*   `comment_content`
+
+Form submissions identified as spam will have an `akismet` validation error key:
+
+~~~ php
+if ($form->error('akismet')) {
+    // submission is spam
+}
+~~~
+
+See the [Akismet developer documentation](https://akismet.com/development/api/) for more information.
+
+
+## ReCaptcha ##
+
+Postman can optionally support recaptcha v2. If you enable this functionality you will need to ensure that RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY are defined for your environment.
+
+To enable ReCaptcha Support, simply invoke the enableCaptcha method on your form object:
+
+~~~ php
+$form->enableCaptcha();
+~~~
+
+Postman will asyncronously load the required API itself, but you will need to position your Captcha in the markup of your form by doing the following:
+
+~~~ php
+$form->renderCaptcha();
+~~~
+
+
 ## Logs ##
 
 The plugin will log all contact form submissions to the database.
+
+
+### Log file download
+
+Postman will add an entry in the __Tools__ menu in WordPress that allows you to download the contact form logs in CSV format. You can change how this works using filters:
+
+*   `cgit_postman_log_capability` edits the minimum user role that is required for log file downloads. The default is `edit_pages`, which means that administrators and editors can download log files.
+
+*   `cgit_postman_log_groups` edits the way the logs are grouped. The default value is `['form_id']`, which means that logs are grouped by form ID.
+
+*   `cgit_postman_log_aliases` provides alternative, human-readable names for form IDs. If you make it return an associative array with keys corresponding to form IDs, the values will be displayed in WordPress instead.
+
+
+### Deleting logs
+
+As of version **2.8.2** Postman will automatically truncate log files older than 180 days (an averaged 6 months). You can override this by looking at the contents below.
+Do not activate a version of Postman later than **2.8.1** without defining the appropriate constant if you do not want this to happen!
+
+You can also use the __Tools__ menu to delete old log files. If there are currently log entries in the database, you will be able to delete logs by number or date or to delete all logs. This process can be automated by setting one or more constants in `wp-config.php`:
+
+~~~ php
+define('CGIT_POSTMAN_LOG_LIMIT', 100); // keep the most recent 100 logs
+define('CGIT_POSTMAN_LOG_LIMIT_DAYS', 30); // keep the most recent 30 days logs
+define('CGIT_POSTMAN_LOG_DELETE_ALL', true); // delete all logs
+~~~
+
+If these constants are set, the deletion process will take place when a user accesses the Wordpress admin panel.
+
+
+## Debugging ##
+
+If `CGIT_POSTMAN_MAIL_DUMP` is defined, the mail class will return the contents of the email message instead of sending it. This might save you from accidentally emailing a client or filling up your inbox.
+
 
 ## Filters ##
 
@@ -239,50 +344,6 @@ add_filter('cgit_postman_data', function ($data, $form_id) {
 });
 ~~~
 
-## Log file download ##
-
-Postman will add an entry in the __Tools__ menu in WordPress that allows you to download the contact form logs in CSV format. You can change how this works using filters:
-
-*   `cgit_postman_log_capability` edits the minimum user role that is required for log file downloads. The default is `edit_pages`, which means that administrators and editors can download log files.
-
-*   `cgit_postman_log_groups` edits the way the logs are grouped. The default value is `['form_id']`, which means that logs are grouped by form ID.
-
-*   `cgit_postman_log_aliases` provides alternative, human-readable names for form IDs. If you make it return an associative array with keys corresponding to form IDs, the values will be displayed in WordPress instead.
-
-## Deleting logs ##
-
-As of version **2.8.2** Postman will automatically truncate log files older than 180 days (an averaged 6 months). You can override this by looking at the contents below.
-Do not activate a version of Postman later than **2.8.1** without defining the appropriate constant if you do not want this to happen!
-
-You can also use the __Tools__ menu to delete old log files. If there are currently log entries in the database, you will be able to delete logs by number or date or to delete all logs. This process can be automated by setting one or more constants in `wp-config.php`:
-
-~~~ php
-define('CGIT_POSTMAN_LOG_LIMIT', 100); // keep the most recent 100 logs
-define('CGIT_POSTMAN_LOG_LIMIT_DAYS', 30); // keep the most recent 30 days logs
-define('CGIT_POSTMAN_LOG_DELETE_ALL', true); // delete all logs
-~~~
-
-If these constants are set, the deletion process will take place when a user accesses the Wordpress admin panel.
-
-## ReCaptcha Support ##
-
-Postman can optionally support recaptcha v2. If you enable this functionality you will need to ensure that RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY are defined for your environment.
-
-To enable ReCaptcha Support, simply invoke the enableCaptcha method on your form object:
-
-~~~ php
-$form->enableCaptcha();
-~~~
-
-Postman will asyncronously load the required API itself, but you will need to position your Captcha in the markup of your form by doing the following:
-
-~~~ php
-$form->renderCaptcha();
-~~~
-
-## Debugging ##
-
-If `CGIT_POSTMAN_MAIL_DUMP` is defined, the mail class will return the contents of the email message instead of sending it. This might save you from accidentally emailing a client or filling up your inbox.
 
 ## Changes since version 2.0 ##
 

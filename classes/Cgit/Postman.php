@@ -2,10 +2,11 @@
 
 namespace Cgit;
 
-use Cgit\Postman\Name;
-use Cgit\Postman\Mailer;
-use Cgit\Postman\Validator;
+use Cgit\Postman\Akismet;
 use Cgit\Postman\Captcha;
+use Cgit\Postman\Mailer;
+use Cgit\Postman\Name;
+use Cgit\Postman\Validator;
 
 /**
  * Post request manager
@@ -119,6 +120,41 @@ class Postman
      * @var bool
      */
     public $hasCaptcha = false;
+
+    /**
+     * Akismet class instance (if enabled)
+     *
+     * @var Akismet|null
+     */
+    private $akismet = null;
+
+    /**
+     * Akismet validation type
+     *
+     * Must be one of comment, forum-post, reply, blog-post, contact-form,
+     * signup, or message.
+     *
+     * @var string|null
+     */
+    private $akismetType = null;
+
+    /**
+     * Akismet fields
+     *
+     * Akistmet fields (keys) and their corresponding Postman field names
+     * (values). Multiple Postman fields can be specified as an array of field
+     * names. In that case, the field values will be concatenated.
+     *
+     * @var array
+     */
+    private $akismetFields = [];
+
+    /**
+     * Akismet error message
+     *
+     * @var string
+     */
+    public $akismetErrorMessage = 'Your message appears to be spam. Please check it and try again.';
 
     /*
      * Constructor
@@ -353,6 +389,11 @@ class Postman
         foreach (array_keys($this->fields) as $field) {
             $this->validate($field);
         }
+
+        // Check for spam with Akismet only if submission is valid.
+        if (!$this->errors()) {
+            $this->validateAkismet();
+        }
     }
 
     /**
@@ -571,6 +612,120 @@ class Postman
     public function renderCaptcha()
     {
         echo '<div class="g-recaptcha" data-sitekey="'.RECAPTCHA_SITE_KEY.'"></div>';
+    }
+
+    /**
+     * Enable Akismet validation
+     *
+     * Enable Akismet validation for this form. The first parameter sets the
+     * Akismet comment type and must be one of: forum-post, reply, blog-post,
+     * contact-form, signup, or message.
+     *
+     * The second parameter maps the Postman fields to valid Akismet fields:
+     * comment_author, comment_author_email, comment_author_url,
+     * comment_content. Multiple Postman field names can be specified as an
+     * array. If no map is provided, all Postman fields will be combined and
+     * submitted as comment_content. But you probably don't really want that to
+     * happen.
+     *
+     * See <https://akismet.com/development/api/>.
+     *
+     * @param string $type Akismet comment type.
+     * @param array $map Array that maps Postman fields to Akismet fields.
+     * @return void
+     */
+    public function enableAkismet(string $type, array $fields = []): void
+    {
+        $this->akismetType = $type;
+        $this->akismetFields = $fields;
+
+        $this->akismet = new Akismet();
+    }
+
+    /**
+     * Is Akismet enabled?
+     *
+     * @return bool
+     */
+    public function hasAkismet(): bool
+    {
+        return $this->akismet instanceof Akismet;
+    }
+
+    /**
+     * Validate form submission with Akismet
+     *
+     * @return void
+     */
+    private function validateAkismet(): void
+    {
+        // Akismet is not enabled? Skip validation.
+        if (!$this->hasAkismet()) {
+            return;
+        }
+
+        // Set Akismet validation parameters.
+        $this->akismet->setAkismetArgs($this->getAkismetFields());
+
+        // Akismet validation returned true. Form submission is not spam.
+        if ($this->akismet->validate()) {
+            return;
+        }
+
+        // Akismet validation returned false. Looks like spam :(
+        $this->errors['akismet'] = $this->akismetErrorMessage;
+    }
+
+    /**
+     * Return Akismet field values based on Postman field values
+     *
+     * Note that this simply maps named Postman fields to the keys set in the
+     * array of Akismet fields. It does not check that the Akismet field keys
+     * themselves are valid.
+     *
+     * @return array
+     */
+    private function getAkismetFields(): array
+    {
+        $values = [];
+
+        foreach ($this->akismetFields as $akismet_key => $postman_key) {
+            $values[$akismet_key] = $this->getFlatValue($postman_key);
+        }
+
+        return array_merge($values, [
+            'comment_type' => $this->akismetType,
+        ]);
+    }
+
+    /**
+     * Return string value from field name(s)
+     *
+     * Multiple fields are combined into a single string.
+     *
+     * @param mixed $field
+     * @return string|null
+     */
+    private function getFlatValue($field): ?string
+    {
+        // Single field name? Return field value.
+        if (is_string($field)) {
+            return (string) $this->value($field);
+        }
+
+        // Array of field names? Return concated values of all fields.
+        if (is_array($field)) {
+            $values = [];
+
+            foreach ($field as $sub_field) {
+                $values[] = $this->getFlatValue($sub_field);
+            }
+
+            return implode(' ', $values);
+        }
+
+        // Not a string or an array of strings? Cannot return value.
+        return null;
     }
 
     /**
