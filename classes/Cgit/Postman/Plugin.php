@@ -36,9 +36,6 @@ class Plugin
             [$this, 'createLogTable']
         );
 
-        // Check for database compatible issues
-        $this->checkNetworkCompatibility();
-
         // Initialize log spooler
         new LogManager();
     }
@@ -66,64 +63,5 @@ class Plugin
             mail_headers VARCHAR(512),
             field_data LONGTEXT
         )');
-
-        $this->updateLegacyTables();
-    }
-
-    /**
-     * Is the database table network compatible?
-     *
-     * @return boolean
-     */
-    public function isNetworkCompatible()
-    {
-        global $wpdb;
-
-        $table = $this->table;
-        $results = $wpdb->get_results("SHOW COLUMNS FROM $table
-            LIKE 'blog_id'");
-
-        if ($results) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Update legacy tables for multisite network compatibility
-     *
-     * @return void
-     */
-    private function updateLegacyTables()
-    {
-        if ($this->isNetworkCompatible()) {
-            return;
-        }
-
-        $this->database->query('ALTER TABLE ' . $this->table
-            . ' ADD blog_id INT AFTER form_id');
-    }
-
-    /**
-     * Check for and notify of network compatibility issues
-     *
-     * @return void
-     */
-    private function checkNetworkCompatibility()
-    {
-        if ($this->isNetworkCompatible()) {
-            return;
-        }
-
-        add_action('admin_notices', function () {
-            ?>
-            <div class="error">
-                <p><strong>Warning:</strong> Please reactivate the Postman
-                plugin to update the database for compatibility with the latest
-                version of the plugin.</p>
-            </div>
-            <?php
-        });
     }
 }
