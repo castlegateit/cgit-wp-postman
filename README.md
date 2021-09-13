@@ -147,7 +147,15 @@ $form->field('email', [
     ],
 ]);
 
+// Enable ReCaptcha
 $form->enableCaptcha();
+
+// Enable Akismet
+$form->enableAkismet('contact-form', [
+    'comment_author' => 'username',
+    'comment_author_email' => 'email',
+]);
+
 ?>
 
 <?php if($form->submit()) : ?>
@@ -157,7 +165,7 @@ $form->enableCaptcha();
     <?php else : ?>
 
         <?php if ($form->errors()) : ?>
-            <p>Some fields contain errors. Please check the fields below and try again.</p>
+            <p>Some fields contain errors. Please check the fields below and try again. <?= $form->errors('akismet') ?></p>
         <?php endif; ?>
 
     <?php endif; ?>
