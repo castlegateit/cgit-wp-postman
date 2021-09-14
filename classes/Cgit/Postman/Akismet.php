@@ -62,6 +62,19 @@ class Akismet
      */
     public function setAkismetArgs(array $args): void
     {
+        // Check for invalid Akismet parameters.
+        $bad_args = array_diff_key($args, $this->defaultArgs);
+
+        if ($bad_args) {
+            $bad_args_text = implode(', ', array_keys($bad_args));
+
+            trigger_error(
+                "Unknown Akismet parameter(s): $bad_args_text.",
+                E_USER_NOTICE
+            );
+        }
+
+        // Sanitize Akismet parameters for submission.
         $args = array_filter($args);
         $args = array_intersect_key($args, $this->defaultArgs);
         $args = array_merge($this->args, $args);
