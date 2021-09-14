@@ -148,7 +148,7 @@ $form->field('email', [
 ]);
 
 // Enable ReCaptcha
-$form->enableCaptcha();
+$form->enableCaptcha($site_key, $secret_key);
 
 // Enable Akismet
 $form->enableAkismet('contact-form', [
@@ -191,7 +191,7 @@ $form->enableAkismet('contact-form', [
 
         <div class="field">
             <?php $form->renderCaptcha(); ?>
-            <?= $form->error('g-recaptcha-response'); ?>
+            <?= $form->error('recaptcha'); ?>
         </div>
 
         <div class="field submit">
@@ -262,18 +262,37 @@ See the [Akismet developer documentation](https://akismet.com/development/api/) 
 
 ## ReCaptcha ##
 
-Postman can optionally support recaptcha v2. If you enable this functionality you will need to ensure that RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY are defined for your environment.
-
-To enable ReCaptcha Support, simply invoke the enableCaptcha method on your form object:
+Postman can check for bot submissions using [ReCaptcha v2](https://developers.google.com/recaptcha). To enable this, use the `enableReCaptcha()` method:
 
 ~~~ php
-$form->enableCaptcha();
+$form->enableReCaptcha();
 ~~~
 
-Postman will asyncronously load the required API itself, but you will need to position your Captcha in the markup of your form by doing the following:
+You can then output the ReCaptcha field and error message where you want them in your template:
 
 ~~~ php
-$form->renderCaptcha();
+echo $form->renderReCaptcha();
+echo $form->error('recaptcha');
+~~~
+
+Note that ReCaptcha will **only** work if the ReCaptcha site and secret API keys have been set. You can set these when you enable ReCaptcha:
+
+~~~ php
+$form->enableReCaptcha('my-site-key', 'my-secret-key');
+~~~
+
+or using methods:
+
+~~~ php
+$form->setReCaptchaSiteKey('my-site-key');
+$form->setReCaptchaSecretKey('my-secret-key');
+~~~
+
+or using constants:
+
+~~~ php
+define('RECAPTCHA_SITE_KEY', 'my-site-key');
+define('RECAPTCHA_SECRET_KEY', 'my-secret-key');
 ~~~
 
 
@@ -368,6 +387,14 @@ add_filter('cgit_postman_data', function ($data, $form_id) {
 *   You can now download log files from the WordPress admin panel.
 
 *   You can now change or replace the mailer and validator classes.
+
+
+## Changes since version 3.0
+
+*   ReCaptcha support has been completely rewritten and is no longer compatible with v2.x. Please review the documentation and adapt your code accordingly.
+
+*   You can no longer replace the mailer, log spooler, and validation classes.
+
 
 ## License
 

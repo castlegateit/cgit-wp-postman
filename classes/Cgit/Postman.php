@@ -3,9 +3,9 @@
 namespace Cgit;
 
 use Cgit\Postman\Akismet;
-use Cgit\Postman\Captcha;
 use Cgit\Postman\Mailer;
 use Cgit\Postman\Name;
+use Cgit\Postman\ReCaptcha;
 use Cgit\Postman\Validator;
 
 /**
@@ -115,11 +115,11 @@ class Postman
      */
 
     /**
-     * Whether the contact form has a captcha or not.
+     * ReCaptcha class instance (if enabled)
      *
-     * @var bool
+     * @var ReCaptcha|null
      */
-    public $hasCaptcha = false;
+    private $recaptcha = null;
 
     /**
      * Akismet class instance (if enabled)
@@ -252,6 +252,11 @@ class Postman
      */
     public function error($name)
     {
+        // Make 'recaptcha' an alias of the ReCaptcha field name.
+        if ($name === 'recaptcha') {
+            $name = ReCaptcha::FIELD_NAME;
+        }
+
         $error = isset($this->errors[$name]) ? $this->errors[$name] : false;
         $template = $this->errorTemplate;
 
@@ -278,6 +283,13 @@ class Postman
     {
         if (!$this->submitted()) {
             return false;
+        }
+
+        if ($this->hasReCaptcha()) {
+            $this->field(ReCaptcha::FIELD_NAME, [
+                'required' => true,
+                'exclude' => true,
+            ]);
         }
 
         $this->updateData();
@@ -390,7 +402,10 @@ class Postman
             $this->validate($field);
         }
 
-        // Check for spam with Akismet only if submission is valid.
+        // Check ReCaptcha response.
+        $this->validateReCaptcha();
+
+        // Check for spam with Akismet (only if submission is valid).
         if (!$this->errors()) {
             $this->validateAkismet();
         }
@@ -585,33 +600,100 @@ class Postman
     }
 
     /**
-     * Determines whether to perform Captcha logic
+     * Enable ReCaptcha
      *
-     * If we're using Captcha logic, then begin that process.
+     * @return void
      */
-    public function enableCaptcha($id = 'g-recaptcha-response')
+    public function enableReCaptcha(): void
     {
-        $this->hasCaptcha = true;
-        $captcha = new Captcha();
-        $captcha->registerCaptcha($id);
-        $this->field($id, [
-        'label' => $id,
-        'required' => true,
-        'exclude' => true,
-        'validate' => [
-            'function' => array($captcha, 'submitRecaptcha')
-        ],
-        'error' => 'Please complete the recaptcha.'
-        ]);
+        $this->recaptcha = new ReCaptcha();
 
-        if ($captcha->explainFailure) {
-            $this->error[$id] = $captcha->explainFailure;
+        if (defined('RECAPTCHA_SITE_KEY') && RECAPTCHA_SITE_KEY) {
+            $this->recaptcha->setSiteKey(RECAPTCHA_SITE_KEY);
+        }
+
+        if (defined('RECAPTCHA_SECRET_KEY') && RECAPTCHA_SECRET_KEY) {
+            $this->recaptcha->setSecretKey(RECAPTCHA_SECRET_KEY);
         }
     }
 
-    public function renderCaptcha()
+    /**
+     * Set ReCaptcha site key
+     *
+     * @param string $key Site key.
+     * @return void
+     */
+    public function setReCaptchaSiteKey(string $key): void
     {
-        echo '<div class="g-recaptcha" data-sitekey="'.RECAPTCHA_SITE_KEY.'"></div>';
+        if (!$this->hasReCaptcha()) {
+            trigger_error("ReCaptcha not active", E_USER_NOTICE);
+
+            return;
+        }
+
+        $this->recaptcha->setSiteKey($key);
+    }
+
+    /**
+     * Set ReCaptcha secret key
+     *
+     * @param string $key Secret key.
+     * @return void
+     */
+    public function setReCaptchaSecretKey(string $key): void
+    {
+        if (!$this->hasReCaptcha()) {
+            trigger_error("ReCaptcha not active", E_USER_NOTICE);
+
+            return;
+        }
+
+        $this->recaptcha->setSecretKey($key);
+    }
+
+    /**
+     * Is ReCaptcha enabled?
+     *
+     * @return bool
+     */
+    public function hasReCaptcha(): bool
+    {
+        return $this->recaptcha instanceof ReCaptcha &&
+            $this->recaptcha->active();
+    }
+
+    /**
+     * Render ReCaptcha field
+     *
+     * @return string|null
+     */
+    public function renderReCaptcha(): ?string
+    {
+        if ($this->hasReCaptcha()) {
+            return $this->recaptcha->render();
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate ReCaptcha response
+     *
+     * @return void
+     */
+    public function validateReCaptcha(): void
+    {
+        if (!$this->hasReCaptcha()) {
+            return;
+        }
+
+        $response = (string) $this->value(ReCaptcha::FIELD_NAME);
+
+        if ($this->recaptcha->validate($response)) {
+            return;
+        }
+
+        $this->errors[ReCaptcha::FIELD_NAME] = 'Please confirm you are not a robot';
     }
 
     /**
