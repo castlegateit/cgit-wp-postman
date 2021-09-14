@@ -185,6 +185,34 @@ class Postman
     }
 
     /**
+     * Add or change mailer setting
+     *
+     * @param string $key Setting key.
+     * @param mixed $value Setting value.
+     * @return void
+     */
+    public function mailer(string $key, $value): void
+    {
+        $this->mailerSettings[$key] = $value;
+    }
+
+    /**
+     * Add or change mail header
+     *
+     * @param string $key Setting key.
+     * @param mixed $value Setting value.
+     * @return void
+     */
+    public function header(string $key, $value): void
+    {
+        if (!isset($this->mailerSettings['headers'])) {
+            $this->mailerSettings['headers'] = [];
+        }
+
+        $this->mailerSettings['headers'][$key] = $value;
+    }
+
+    /**
      * Add field
      *
      * @param string $name
