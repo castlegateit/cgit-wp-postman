@@ -178,7 +178,7 @@ $form->field('email', [
 ]);
 
 // Enable ReCaptcha
-$form->enableCaptcha($site_key, $secret_key);
+$form->enableReCaptcha($site_key, $secret_key);
 
 // Enable Akismet
 $form->enableAkismet('contact-form', [
