@@ -30,7 +30,7 @@ By default, the error message is returned as a string. If you supply a template 
 $postman->errorTemplate = '<span class="error">%s</span>';
 ~~~
 
-You can use the `mailerSettings` property to change the email settings:
+You can use the `mailerSettings` property directly to change the email settings:
 
 ~~~ php
 $postman->mailerSettings = [
@@ -44,7 +44,35 @@ $postman->mailerSettings = [
 ];
 ~~~
 
+However, the `mailer` and `header` methods are preferred for editing these settings.
+
+
 ### Methods ###
+
+
+#### Mailer configuration
+
+Add or edit mailer settings (i.e. `$to` and `$subject` parameters passed to `wp_mail` function):
+
+~~~ php
+$postman->mailer('to', 'example@example.com');
+$postman->mailer('subject', 'Example message');
+~~~
+
+Note that you can prevent mail from being sent by setting `to` to `null`.
+
+
+#### Headers
+
+Add or edit email headers (i.e. `$headers` parameter passed to `wp_mail` function):
+
+~~~ php
+$postman->header('from', 'example@example.com');
+$postman->header('x-foo', 'example@example.com');
+~~~
+
+
+#### Fields
 
 Add a field, with various options:
 
@@ -108,6 +136,7 @@ $postman->fields([
 ~~~
 
 
+#### Values and error messages
 
 Return data for the field `$name`:
 
@@ -115,6 +144,7 @@ Return data for the field `$name`:
 $postman->value($name); // value
 $postman->error($name); // error message, within error template
 ~~~
+
 
 ## Example ##
 
