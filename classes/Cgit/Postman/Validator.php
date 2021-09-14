@@ -84,7 +84,7 @@ class Validator
 
             // Check validation method exists
             if (!method_exists($this, $method)) {
-                return trigger_error('Unknown validation method: ' . $method);
+                return trigger_error('Unknown validation method ' . $method);
             }
 
             // If invalid, add validation type to array of errors
@@ -315,12 +315,12 @@ class Validator
             $method = $function[1];
 
             if (!method_exists($object, $method)) {
-                trigger_error('Method not defined: ' . $method . ' in object: ' . $object);
+                trigger_error("Method \"$method\" not defined in \"$object\"");
             }
 
             return $object->$method($value, $this->formData);
         } elseif (!function_exists($function)) {
-            trigger_error('Function not defined: ' . $function);
+            trigger_error("Function \"$function\" not defined");
         }
 
         return $function($value, $this->formData);

@@ -713,7 +713,7 @@ class Postman
         if (is_string($field)) {
             // Strict mode (field must exist)?
             if ($strict && !array_key_exists($field, $this->fields)) {
-                trigger_error("Unknown Postman field: $field.", E_USER_NOTICE);
+                trigger_error("Unknown Postman field \"$field\"", E_USER_NOTICE);
                 return null;
             }
 

@@ -43,7 +43,7 @@ class Akismet
         $this->setAkismetArgs($args);
 
         if (!static::active()) {
-            trigger_error('Akismet not available.', E_USER_NOTICE);
+            trigger_error('Akismet not available', E_USER_NOTICE);
         }
 
         if (!static::verify()) {
@@ -69,7 +69,7 @@ class Akismet
             $bad_args_text = implode(', ', array_keys($bad_args));
 
             trigger_error(
-                "Unknown Akismet parameter(s): $bad_args_text.",
+                "Unknown Akismet parameter(s) $bad_args_text",
                 E_USER_NOTICE
             );
         }
