@@ -255,6 +255,8 @@ if ($form->error('akismet')) {
 }
 ~~~
 
+You can [force a submission to be identified as spam](https://akismet.com/development/api/#comment-check), and so test the Akismet integration, by submitting `viagra-test-123` as the `comment_author` or by submitting `akismet-guaranteed-spam@example.com` as the `comment_author_email`.
+
 See the [Akismet developer documentation](https://akismet.com/development/api/) for more information.
 
 
