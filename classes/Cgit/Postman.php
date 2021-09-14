@@ -690,7 +690,7 @@ class Postman
         $values = [];
 
         foreach ($this->akismetFields as $akismet_key => $postman_key) {
-            $values[$akismet_key] = $this->getFlatValue($postman_key);
+            $values[$akismet_key] = $this->getFlatValue($postman_key, true);
         }
 
         return array_merge($values, [
@@ -704,12 +704,19 @@ class Postman
      * Multiple fields are combined into a single string.
      *
      * @param mixed $field
+     * @param bool $strict
      * @return string|null
      */
-    private function getFlatValue($field): ?string
+    private function getFlatValue($field, bool $strict = false): ?string
     {
         // Single field name? Return field value.
         if (is_string($field)) {
+            // Strict mode (field must exist)?
+            if ($strict && !array_key_exists($field, $this->fields)) {
+                trigger_error("Unknown Postman field: $field.", E_USER_NOTICE);
+                return null;
+            }
+
             return (string) $this->value($field);
         }
 
@@ -718,7 +725,7 @@ class Postman
             $values = [];
 
             foreach ($field as $sub_field) {
-                $values[] = $this->getFlatValue($sub_field);
+                $values[] = $this->getFlatValue($sub_field, $strict);
             }
 
             return implode(' ', $values);
