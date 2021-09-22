@@ -149,20 +149,21 @@ $postman->error($name); // error message, within error template
 ## Example ##
 
 ~~~ php
-$form = new Cgit\Postman('contact');
+$form = new \Cgit\Postman('contact');
 
 $form->method = 'post';
 $form->errorMessage = 'That doesn\'t work';
-$form->errorTemplate = '<span>%s</span>';
-$form->mailerSettings['headers'] = [
-    'Reply-To' => 'example@example.com'
-];
-
-// Error message form
 $form->errorTemplate = '<span class="error">%s</span>';
 
-// Define the form fields
-$form->field('username', [
+// Set mail recipient and subject
+$form->mailer('to', 'example@example.com');
+$form->mailer('subject', 'Test message');
+
+// Set mail headers
+$form->header('Reply-To', 'example@example.com');
+
+// Define form fields
+$form->field('fullname', [
     'label' => 'Name',
     'required' => true,
     'error' => 'Please enter your name',
@@ -182,55 +183,48 @@ $form->enableReCaptcha($site_key, $secret_key);
 
 // Enable Akismet
 $form->enableAkismet('contact-form', [
-    'comment_author' => 'username',
+    'comment_author' => 'fullname',
     'comment_author_email' => 'email',
 ]);
 
-?>
+// Check for form submission
+$form->submit();
 
-<?php if($form->submit()) : ?>
+// Show form or success message
+if ($form->sent()) {
+    echo 'Your message has been sent. Thank you.';
+} else {
+    // Form has been submitted with errors?
+    if ($form->errors()) {
+        echo 'Your message contains errors.';
 
-    <?php if($form->sent()) : ?>
-        <p>Thank you, your message has been sent. Someone will be in touch with you as soon as possible.</p>
-    <?php else : ?>
+        // Submission has not passed Akismet's spam check?
+        echo $form->error('akismet');
+    }
 
-        <?php if ($form->errors()) : ?>
-            <p>Some fields contain errors. Please check the fields below and try again. <?= $form->errors('akismet') ?></p>
-        <?php endif; ?>
+    ?>
 
-    <?php endif; ?>
-<?php endif; ?>
+    <form action="" method="post">
+        <input type="hidden" name="postman_form_id" value="contact">
 
-<?php if(!$form->sent()) : ?>
+        <label for="fullname">Name</label>
+        <input type="text" name="fullname" id="fullname"
+            value="<?= $form->value('fullname') ?>" required>
+        <?= $form->error('fullname') ?>
 
-    <form method="post">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email"
+            value="<?= $form->value('email') ?>" required>
+        <?= $form->error('email') ?>
 
-        <input type="hidden" name="postman_form_id" value="contact" />
+        <?= $form->renderReCaptcha() ?>
+        <?= $form->error('recaptcha') ?>
 
-        <div class="field field-half">
-            <label for="username" class="text-label">Name</label>
-            <input type="text" name="username" id="username" value="<?= $form->value('username'); ?>" class="text-input" required />
-            <?= $form->error('username'); ?>
-        </div>
-
-        <div class="field field-half">
-            <label for="email" class="text-label">Email</label>
-            <input type="email" name="email" id="email" class="text-input" value="<?= $form->value('email'); ?>" required />
-            <?= $form->error('email'); ?>
-        </div>
-
-        <div class="field">
-            <?php $form->renderCaptcha(); ?>
-            <?= $form->error('recaptcha'); ?>
-        </div>
-
-        <div class="field submit">
-            <button class="button">Send Message</button>
-        </div>
-
+        <button type="submit">Send</button>
     </form>
 
-<?php endif; ?>
+    <?php
+}
 ~~~
 
 
