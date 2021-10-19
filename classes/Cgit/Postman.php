@@ -73,6 +73,13 @@ class Postman
     private $sent = false;
 
     /**
+     * Attempted to send mail?
+     *
+     * @var bool
+     */
+    private $attempted = false;
+
+    /**
      * Fields
      *
      * An array of fields that will be processed as part of this form. Fields
@@ -352,6 +359,16 @@ class Postman
     }
 
     /**
+     * Failed to send message?
+     *
+     * @return bool
+     */
+    public function failed(): bool
+    {
+        return $this->attempted && !$this->sent;
+    }
+
+    /**
     * Whether the contact form has generated any errors or not.
     *
     * @return boolean
@@ -538,6 +555,8 @@ class Postman
         $this->log();
 
         // Attempt to send the message
+        $this->attempted = true;
+
         return $this->sent = $mailer->send();
     }
 

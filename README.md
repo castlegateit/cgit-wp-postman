@@ -194,6 +194,11 @@ $form->submit();
 if ($form->sent()) {
     echo 'Your message has been sent. Thank you.';
 } else {
+    // Mailer has failed to send (e.g. email service problem)?
+    if ($form->failed()) {
+        echo 'Failed to send message.';
+    }
+
     // Form has been submitted with errors?
     if ($form->errors()) {
         echo 'Your message contains errors.';
