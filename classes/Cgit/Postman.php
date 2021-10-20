@@ -320,6 +320,9 @@ class Postman
      */
     public function submit()
     {
+        $this->validateAkismetConf();
+        $this->validateReCaptchaConf();
+
         if (!$this->submitted()) {
             return false;
         }
@@ -752,6 +755,18 @@ class Postman
     }
 
     /**
+     * Validate ReCaptcha configuration
+     *
+     * @return void
+     */
+    private function validateReCaptchaConf(): void
+    {
+        if ($this->recaptcha instanceof ReCaptcha && !$this->recaptcha->active()) {
+            trigger_error('ReCaptcha enabled but API key missing.', E_USER_ERROR);
+        }
+    }
+
+    /**
      * Enable Akismet validation
      *
      * Enable Akismet validation for this form. The first parameter sets the
@@ -870,6 +885,26 @@ class Postman
 
         // Not a string or an array of strings? Cannot return value.
         return null;
+    }
+
+    /**
+     * Validate Akismet configuration
+     *
+     * @return void
+     */
+    private function validateAkismetConf(): void
+    {
+        if (!($this->akismet instanceof Akismet)) {
+            return;
+        }
+
+        if (!$this->akismet->active()) {
+            trigger_error('Akismet enabled but API key missing.', E_USER_ERROR);
+        }
+
+        if (!Akismet::verify()) {
+            trigger_error('Akismet enabled but API key invalid.', E_USER_ERROR);
+        }
     }
 
     /**
