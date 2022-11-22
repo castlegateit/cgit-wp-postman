@@ -276,9 +276,11 @@ class Postman
      * will be applied to the error message.
      *
      * @param string $name
+     * @param string $before
+     * @param string $after
      * @return string
      */
-    public function error($name)
+    public function error($name, $before = '', $after = '')
     {
         // Make 'recaptcha' an alias of the ReCaptcha field name.
         if ($name === 'recaptcha') {
@@ -291,6 +293,8 @@ class Postman
         if (!$error) {
             return false;
         }
+
+        $error = $before . $error . $after;
 
         if ($template && strpos($template, '%s') !== false) {
             $error = sprintf($template, $error);
