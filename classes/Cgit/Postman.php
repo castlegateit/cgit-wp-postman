@@ -80,6 +80,13 @@ class Postman
     private $attempted = false;
 
     /**
+     * Logs enabled?
+     *
+     * @var bool
+     */
+    private $logsEnabled = true;
+
+    /**
      * Fields
      *
      * An array of fields that will be processed as part of this form. Fields
@@ -243,6 +250,26 @@ class Postman
         foreach ($fields as $name => $options) {
             $this->field($name, $options);
         }
+    }
+
+    /**
+     * Enable logs
+     *
+     * @return void
+     */
+    public function enableLogs(): void
+    {
+        $this->logsEnabled = true;
+    }
+
+    /**
+     * Disable logs
+     *
+     * @return void
+     */
+    public function disableLogs(): void
+    {
+        $this->logsEnabled = false;
     }
 
     /**
@@ -917,6 +944,11 @@ class Postman
     {
         global $post;
         global $wpdb;
+
+        // Logs disabled? Do not save to database.
+        if (!$this->logsEnabled) {
+            return;
+        }
 
         $table = $wpdb->base_prefix . 'cgit_postman_log';
         $opts = $this->mailerSettings;

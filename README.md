@@ -327,7 +327,11 @@ define('RECAPTCHA_SECRET_KEY', 'my-secret-key');
 
 ## Logs ##
 
-The plugin will log all contact form submissions to the database.
+The plugin will log all contact form submissions to the database. This feature can be disabled:
+
+~~~ php
+$form->disableLogs();
+~~~
 
 
 ### Log file download
