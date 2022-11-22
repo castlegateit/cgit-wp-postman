@@ -720,6 +720,10 @@ class Postman
             return $this->recaptcha->render();
         }
 
+        if ($this->recaptcha instanceof ReCaptcha) {
+            trigger_error('ReCaptcha keys missing');
+        }
+
         return null;
     }
 
