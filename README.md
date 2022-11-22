@@ -88,7 +88,7 @@ $postman->field('example_name', [
         'min' => 10, // minimum value for numeric fields
         'pattern' => '/foo/', // a regular expression match
         'match' => 'bar', // exactly matches another field called bar
-        'function' => 'foo', // any named function
+        'function' => 'foo', // any callable
     ],
     'error' => 'Please enter a valid email address',
     'value' => 'The default field value',

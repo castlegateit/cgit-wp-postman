@@ -17,7 +17,7 @@ namespace Cgit\Postman;
  *      'min' => 4, // minimum numeric value
  *      'pattern' => '/foo/', // any regular expression
  *      'match' => 'bar', // value matches another named field
- *      'function' => 'foo', // any named function
+ *      'function' => 'foo', // any callable
  *  ];
  *
  * The valid() method returns true if the value matches all the rules. The
@@ -303,26 +303,16 @@ class Validator
      * named function.
      *
      * @param mixed $value
-     * @param callback $function
+     * @param callable $function
      * @return boolean
      */
     protected function isFunction($value, $function)
     {
-
-        // If we have an array, we should treat the $function param like a method.
-        if (is_array($function)) {
-            $object = $function[0];
-            $method = $function[1];
-
-            if (!method_exists($object, $method)) {
-                trigger_error("Method \"$method\" not defined in \"$object\"");
-            }
-
-            return $object->$method($value, $this->formData);
-        } elseif (!function_exists($function)) {
-            trigger_error("Function \"$function\" not defined");
+        if (!is_callable($function)) {
+            trigger_error('Validation function not callable');
+            return true;
         }
 
-        return $function($value, $this->formData);
+        return (bool) call_user_func($function, $value, $this->formData);
     }
 }
