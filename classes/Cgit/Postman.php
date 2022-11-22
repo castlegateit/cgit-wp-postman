@@ -361,10 +361,17 @@ class Postman
         // Filter data before validation
         $this->data = apply_filters('cgit_postman_data_pre_validate', $this->data, $this->id);
 
+        // Perform data actions before validation
+        do_action('cgit_postman_' . $this->id . '_data_pre_validate', $this->data);
+
+        // Validate form submission
         $this->validateForm();
 
         // Filter data after validation but before sending
         $this->data = apply_filters('cgit_postman_data_post_validate', $this->data, $this->id);
+
+        // Perform data actions after validation
+        do_action('cgit_postman_' . $this->id . '_data_post_validate', $this->data);
 
         if ($this->errors) {
             return false;
@@ -373,6 +380,10 @@ class Postman
         // Filter data and fields before sending
         $this->data = apply_filters('cgit_postman_data', $this->data, $this->id);
         $this->fields = apply_filters('cgit_postman_fields', $this->fields, $this->id);
+
+        // Perform data and field actions on valid submission
+        do_action('cgit_postman_' . $this->id . '_data', $this->data);
+        do_action('cgit_postman_' . $this->id . '_fields', $this->fields);
 
         return $this->send();
     }

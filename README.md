@@ -366,6 +366,14 @@ If these constants are set, the deletion process will take place when a user acc
 If `CGIT_POSTMAN_MAIL_DUMP` is defined, the mail class will return the contents of the email message instead of sending it. This might save you from accidentally emailing a client or filling up your inbox.
 
 
+## Actions ##
+
+*   `cgit_postman_{$form_id}_data_pre_validate` runs after form submission and before validation; parameter is an array of form data.
+*   `cgit_postman_{$form_id}_data_post_validate` runs after form submission and validation; parameter is an array of form data.
+*   `cgit_postman_{$form_id}_data` runs after validation and before send on valid data only; parameter is an array of form data.
+*   `cgit_postman_{$form_id}_fields` runs after validation and before send on valid data only; parameter is an array of form field definitions.
+
+
 ## Filters ##
 
 *   `cgit_postman_data_pre_validate` associative array of submitted form data, before validation.*
