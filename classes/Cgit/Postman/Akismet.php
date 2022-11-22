@@ -41,14 +41,6 @@ class Akismet
     public function __construct(array $args = [])
     {
         $this->setAkismetArgs($args);
-
-        if (!static::active()) {
-            trigger_error('Akismet not available', E_USER_NOTICE);
-        }
-
-        if (!static::verify()) {
-            trigger_error('Akismet key invalid', E_USER_NOTICE);
-        }
     }
 
     /**
@@ -124,6 +116,13 @@ class Akismet
     {
         // Akismet plugin disabled? Skip spam check.
         if (!static::active()) {
+            return true;
+        }
+
+        // Akismet API key invalid? Skip spam check with notice.
+        if (!static::verify()) {
+            trigger_error('Akismet key invalid', E_USER_NOTICE);
+
             return true;
         }
 
