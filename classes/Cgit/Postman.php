@@ -111,17 +111,6 @@ class Postman
     private $data = [];
 
     /**
-     * Constructor
-     *
-     * Set default values for the email recipient, from address, and subject
-     * line. Make an educated guess for the current domain based on the
-     * SERVER_NAME environment variable.
-     *
-     * @param string $id
-     * @return void
-     */
-
-    /**
      * ReCaptcha class instance (if enabled)
      *
      * @var ReCaptcha|null
@@ -163,10 +152,16 @@ class Postman
      */
     public $akismetErrorMessage = 'Your message appears to be spam. Please check it and try again.';
 
-    /*
-     * Constructor
+    /**
+     * Construct
+     *
+     * Set default values for the email recipient, from address, and subject
+     * line. Make an educated guess for the current domain based on the
+     * SERVER_NAME environment variable.
+     *
+     * @param string $id
+     * @return void
      */
-
     public function __construct($id)
     {
         // Set form ID
