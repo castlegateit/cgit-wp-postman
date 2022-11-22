@@ -367,6 +367,9 @@ class Postman
         // Validate form submission
         $this->validateForm();
 
+        // Filter errors
+        $this->errors = apply_filters('cgit_postman_errors', $this->errors, $this->data, $this->id);
+
         // Filter data after validation but before sending
         $this->data = apply_filters('cgit_postman_data_post_validate', $this->data, $this->id);
 

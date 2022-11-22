@@ -378,6 +378,7 @@ If `CGIT_POSTMAN_MAIL_DUMP` is defined, the mail class will return the contents 
 
 *   `cgit_postman_data_pre_validate` associative array of submitted form data, before validation.*
 *   `cgit_postman_data_post_validate` associative array of submitted form data, after validation but before being sent.*
+*   `cgit_postman_errors` associative array of errors after validation, with an array of data as the second parameter and the form ID as the third parameter.
 *   `cgit_postman_data` associative array of submitted form data, validated and just prior to sending.*
 *   `cgit_postman_fields` associative array of all field data, just prior to sending.*
 *   `cgit_postman_value_{$name}` value of field `$name`.*
