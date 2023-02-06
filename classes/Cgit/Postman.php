@@ -984,8 +984,8 @@ class Postman
             $user_agent = $_SERVER['HTTP_USER_AGENT'];
         }
 
-        // Add row to database
-        $wpdb->insert($table, [
+        // Assemble log entry data
+        $data = [
             'date' => date('Y-m-d H:i:s'),
             'form_id' => $this->id,
             'blog_id' => $wpdb->blogid,
@@ -998,6 +998,12 @@ class Postman
             'mail_body' => $this->messageContent(),
             'mail_headers' => implode(PHP_EOL, $pairs),
             'field_data' => json_encode($this->fields),
-        ]);
+        ];
+
+        // Apply filters to log entry data
+        $data = apply_filters('cgit_postman_log_data', $data, $this->id);
+
+        // Add row to database
+        $wpdb->insert($table, $data);
     }
 }

@@ -391,6 +391,7 @@ If `CGIT_POSTMAN_MAIL_DUMP` is defined, the mail class will return the contents 
 *   `cgit_postman_mail_cc` mail class `cc` address.
 *   `cgit_postman_mail_bcc` mail class `bcc` address.
 *   `cgit_postman_mail_headers` receives an associative array of headers.
+*   `cgit_postman_log_data` associative array of data to be saved to the submission log in the database.*
 
 For example, the `Reply-To` header could be edited as follows:
 
