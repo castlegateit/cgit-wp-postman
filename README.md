@@ -4,10 +4,10 @@ Postman is a flexible contact form plugin for WordPress. It provides a framework
 
 ## Postman ##
 
-The `Cgit\Postman` class is used to create sets of form fields. Each instance represents a separate form. Since version 2.0, the constructor requires a single argument, which is used as a unique identifier for that form:
+The `Castlegate\Postman\Postman` class is used to create sets of form fields. Each instance represents a separate form. Since version 2.0, the constructor requires a single argument, which is used as a unique identifier for that form:
 
 ~~~ php
-$postman = new \Cgit\Postman('foo');
+$postman = new \Castlegate\Postman\Postman('foo');
 ~~~
 
 ### Properties ###
@@ -149,7 +149,7 @@ $postman->error($name); // error message, within error template
 ## Example ##
 
 ~~~ php
-$form = new \Cgit\Postman('contact');
+$form = new \Castlegate\Postman\Postman('contact');
 
 $form->method = 'post';
 $form->errorMessage = 'That doesn\'t work';
@@ -178,15 +178,6 @@ $form->field('email', [
     ],
 ]);
 
-// Enable ReCaptcha
-$form->enableReCaptcha($site_key, $secret_key);
-
-// Enable Akismet
-$form->enableAkismet('contact-form', [
-    'comment_author' => 'fullname',
-    'comment_author_email' => 'email',
-]);
-
 // Check for form submission
 $form->submit();
 
@@ -205,6 +196,9 @@ if ($form->sent()) {
 
         // Submission has not passed Akismet's spam check?
         echo $form->error('akismet');
+
+        // Submission has not passed ReCaptcha?
+        echo $form->error('recaptcha');
     }
 
     ?>
@@ -222,9 +216,6 @@ if ($form->sent()) {
             value="<?= $form->value('email') ?>" required>
         <?= $form->error('email') ?>
 
-        <?= $form->renderReCaptcha() ?>
-        <?= $form->error('recaptcha') ?>
-
         <button type="submit">Send</button>
     </form>
 
@@ -240,7 +231,7 @@ Postman can check form submissions for spam using the [Akismet](https://akismet.
 When Akismet is active and registered, you can enable Akismet support using the `enableAkismet` method on the `Postman` form instance:
 
 ~~~ php
-$form = new \Cgit\Postman('contact');
+$form = new \Castlegate\Postman\Postman('contact');
 
 $form->fields([
     'fullname' => [],
@@ -291,37 +282,41 @@ See the [Akismet developer documentation](https://akismet.com/development/api/) 
 
 ## ReCaptcha ##
 
-Postman can check for bot submissions using [ReCaptcha v2](https://developers.google.com/recaptcha). To enable this, use the `enableReCaptcha()` method:
+Postman can check for bot submissions using [ReCaptcha](https://developers.google.com/recaptcha). It supports the [checkbox-based ReCaptcha v2](https://developers.google.com/recaptcha/docs/display) and the [invisible ReCaptcha v3](https://developers.google.com/recaptcha/docs/v3).
+
+Note that ReCaptcha v2 cannot be used at the same time as ReCaptcha v3. Note also that v2 and v3 use different API keys.
+
+
+### ReCaptcha v2
+
+Enable ReCaptcha v2:
 
 ~~~ php
-$form->enableReCaptcha();
+$form->enableReCaptcha2($site_key, $secret_key);
 ~~~
 
 You can then output the ReCaptcha field and error message where you want them in your template:
 
 ~~~ php
-echo $form->renderReCaptcha();
+echo $form->renderReCaptcha2();
 echo $form->error('recaptcha');
 ~~~
 
-Note that ReCaptcha will **only** work if the ReCaptcha site and secret API keys have been set. You can set these when you enable ReCaptcha:
+Note that the methods `enableReCaptcha` and `renderReCaptcha` exist for backward compatibility with previous versions of Postman. These methods are aliases of the v2 methods and are now deprecated. They should be replaced with the new version-specific methods.
+
+
+### ReCaptcha v3
+
+Enable ReCaptcha v3:
 
 ~~~ php
-$form->enableReCaptcha('my-site-key', 'my-secret-key');
+$form->enableReCaptcha3($site_key, $secret_key);
 ~~~
 
-or using methods:
+The necessary scripts for ReCaptcha v3 will be enqueued automatically, so there is no need to render any HTML. However, you will need to display the error message somewhere in or near your form:
 
 ~~~ php
-$form->setReCaptchaSiteKey('my-site-key');
-$form->setReCaptchaSecretKey('my-secret-key');
-~~~
-
-or using constants:
-
-~~~ php
-define('RECAPTCHA_SITE_KEY', 'my-site-key');
-define('RECAPTCHA_SECRET_KEY', 'my-secret-key');
+$form->error('recaptcha');
 ~~~
 
 

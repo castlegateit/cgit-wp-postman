@@ -1,6 +1,6 @@
 <?php
 
-namespace Cgit\Postman;
+namespace Castlegate\Postman;
 
 class Plugin
 {
@@ -38,6 +38,18 @@ class Plugin
 
         // Initialize log spooler
         new LogManager();
+    }
+
+    /**
+     * Initialization
+     *
+     * @return void
+     */
+    public static function init(): void
+    {
+        $plugin = new self();
+
+        do_action('cgit_postman_loaded');
     }
 
     /**

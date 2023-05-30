@@ -1,0 +1,14 @@
+{
+    "name": "castlegate/cgit-wp-postman",
+    "autoload": {
+        "psr-4": {
+            "Castlegate\\Postman\\": "classes"
+        },
+        "files": [
+            "compat/Postman.php"
+        ]
+    },
+    "require": {
+        "google/recaptcha": "^1.2"
+    }
+}

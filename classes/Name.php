@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cgit\Postman;
+namespace Castlegate\Postman;
 
 class Name
 {

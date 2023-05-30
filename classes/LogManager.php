@@ -1,6 +1,6 @@
 <?php
 
-namespace Cgit\Postman;
+namespace Castlegate\Postman;
 
 /**
  * Log processing

@@ -1,12 +1,6 @@
 <?php
 
-namespace Cgit;
-
-use Cgit\Postman\Akismet;
-use Cgit\Postman\Mailer;
-use Cgit\Postman\Name;
-use Cgit\Postman\ReCaptcha;
-use Cgit\Postman\Validator;
+namespace Castlegate\Postman;
 
 /**
  * Post request manager
@@ -690,55 +684,53 @@ class Postman
     }
 
     /**
-     * Enable ReCaptcha
+     * Enable ReCaptcha 2
      *
+     * @param string|null $site_key
+     * @param string|null $secret_key
      * @return void
      */
-    public function enableReCaptcha(): void
+    public function enableReCaptcha2(string $site_key = null, string $secret_key = null): void
     {
-        $this->recaptcha = new ReCaptcha();
-
-        if (defined('RECAPTCHA_SITE_KEY') && RECAPTCHA_SITE_KEY) {
-            $this->recaptcha->setSiteKey(RECAPTCHA_SITE_KEY);
-        }
-
-        if (defined('RECAPTCHA_SECRET_KEY') && RECAPTCHA_SECRET_KEY) {
-            $this->recaptcha->setSecretKey(RECAPTCHA_SECRET_KEY);
-        }
-    }
-
-    /**
-     * Set ReCaptcha site key
-     *
-     * @param string $key Site key.
-     * @return void
-     */
-    public function setReCaptchaSiteKey(string $key): void
-    {
-        if (!$this->hasReCaptcha()) {
-            trigger_error("ReCaptcha not active", E_USER_NOTICE);
-
+        if ($this->recaptcha instanceof ReCaptcha) {
+            trigger_error('ReCaptcha already enabled', E_USER_ERROR);
             return;
         }
 
-        $this->recaptcha->setSiteKey($key);
+        $this->recaptcha = new ReCaptcha2($site_key, $secret_key);
     }
 
     /**
-     * Set ReCaptcha secret key
+     * Enable ReCaptcha 3
      *
-     * @param string $key Secret key.
+     * @param string|null $site_key
+     * @param string|null $secret_key
      * @return void
      */
-    public function setReCaptchaSecretKey(string $key): void
+    public function enableReCaptcha3(string $site_key = null, string $secret_key = null): void
     {
-        if (!$this->hasReCaptcha()) {
-            trigger_error("ReCaptcha not active", E_USER_NOTICE);
-
+        if ($this->recaptcha instanceof ReCaptcha) {
+            trigger_error('ReCaptcha already enabled', E_USER_ERROR);
             return;
         }
 
-        $this->recaptcha->setSecretKey($key);
+        $this->recaptcha = new ReCaptcha3($site_key, $secret_key);
+
+        $this->recaptcha->addForm($this->id);
+        $this->recaptcha->embedForms();
+    }
+
+    /**
+     * Enable ReCaptcha 2
+     *
+     * @deprecated
+     * @param string|null $site_key
+     * @param string|null $secret_key
+     * @return void
+     */
+    public function enableReCaptcha(string $site_key = null, string $secret_key = null): void
+    {
+        $this->enableReCaptcha2($site_key, $secret_key);
     }
 
     /**
@@ -753,11 +745,11 @@ class Postman
     }
 
     /**
-     * Render ReCaptcha field
+     * Render ReCaptcha 2 field
      *
      * @return string|null
      */
-    public function renderReCaptcha(): ?string
+    public function renderReCaptcha2(): ?string
     {
         if ($this->hasReCaptcha()) {
             return $this->recaptcha->render();
@@ -768,6 +760,17 @@ class Postman
         }
 
         return null;
+    }
+
+    /**
+     * Render ReCaptcha 2 field
+     *
+     * @deprecated
+     * @return string|null
+     */
+    public function renderReCaptcha(): ?string
+    {
+        return $this->renderReCaptcha2();
     }
 
     /**
