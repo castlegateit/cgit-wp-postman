@@ -20,3 +20,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 *   Remove site key and secret methods from `Postman` class. Keys are now set exclusively by the `enableReCaptcha2` and `enableReCaptcha3` methods.
+
+## 3.0.0 (2021-09-10)
+
+*   ReCaptcha support has been completely rewritten and is no longer compatible with v2.x. Please review the documentation and adapt your code accordingly.
+*   You can no longer replace the mailer, log spooler, and validation classes.
+
+## 2.0.0 (2016-07-13)
+
+*   Forms now require a unique identifier, set in the constructor. This makes submission detection automatic and allows accurate logging.
+*   Mailer settings have been moved from individual properties, such as `mailTo` to a single property called `mailerSettings` that consists of an array of mailer settings.
+*   The `detect()` method has been removed. Form identification is now automatic, based on the unique form ID set in the constructor.
+*   The new `exclude` field option prevents fields appearing in email messages or log downloads.
+*   You can now download log files from the WordPress admin panel.
+*   You can now change or replace the mailer and validator classes.
