@@ -31,7 +31,7 @@ class ReCaptcha2 extends ReCaptcha
      */
     public function enqueueScripts(): void
     {
-        wp_enqueue_script(self::API_SCRIPT_HANDLE)
+        wp_enqueue_script(self::API_SCRIPT_HANDLE);
     }
 
     /**

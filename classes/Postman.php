@@ -751,11 +751,11 @@ class Postman
      */
     public function renderReCaptcha2(): ?string
     {
-        if ($this->hasReCaptcha()) {
-            return $this->recaptcha->render();
-        }
+        if ($this->recaptcha instanceof ReCaptcha2) {
+            if ($this->recaptcha->active()) {
+                return $this->recaptcha->render();
+            }
 
-        if ($this->recaptcha instanceof ReCaptcha) {
             trigger_error('ReCaptcha keys missing');
         }
 
