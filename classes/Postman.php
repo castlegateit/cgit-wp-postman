@@ -119,6 +119,20 @@ class Postman
     private $recaptcha = null;
 
     /**
+     * ReCaptcha 2 error message
+     *
+     * @var string
+     */
+    private $recaptcha2ErrorMessage = 'Please confirm you are not a robot';
+
+    /**
+     * ReCaptcha 3 error message
+     *
+     * @var string
+     */
+    private $recaptcha3ErrorMessage = 'An issue occurred during the validation process. Please try again.';
+
+    /**
      * Akismet class instance (if enabled)
      *
      * @var Akismet|null
@@ -301,7 +315,7 @@ class Postman
      * @param string $name
      * @param string $before
      * @param string $after
-     * @return string
+     * @return string|null
      */
     public function error($name, $before = '', $after = '')
     {
@@ -790,7 +804,7 @@ class Postman
             return;
         }
 
-        $this->errors[ReCaptcha::FIELD_NAME] = 'Please confirm you are not a robot';
+        $this->errors[ReCaptcha::FIELD_NAME] = $this->getReCaptchaErrorMessage();
     }
 
     /**
@@ -803,6 +817,24 @@ class Postman
         if ($this->recaptcha instanceof ReCaptcha && !$this->recaptcha->active()) {
             trigger_error('ReCaptcha enabled but API key missing.', E_USER_ERROR);
         }
+    }
+
+    /**
+     * Return ReCaptcha error message
+     *
+     * @return string|null
+     */
+    private function getReCaptchaErrorMessage(): ?string
+    {
+        if ($this->recaptcha instanceof ReCaptcha2 && $this->recaptcha->active()) {
+            return $this->recaptcha2ErrorMessage;
+        }
+
+        if ($this->recaptcha instanceof ReCaptcha3 && $this->recaptcha->active()) {
+            return $this->recaptcha3ErrorMessage;
+        }
+
+        return null;
     }
 
     /**
