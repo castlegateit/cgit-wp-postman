@@ -148,38 +148,51 @@ $postman->error($name); // error message, within error template
 
 ## Example ##
 
+Note that the form is defined and validated on `init`, which is necessary for ReCaptcha v3 validation. Define the form in `functions.php`:
+
 ~~~ php
-$form = new \Castlegate\Postman\Postman('contact');
+add_action('init', function () {
+    $form = new \Castlegate\Postman\Postman('contact');
 
-$form->method = 'post';
-$form->errorMessage = 'That doesn\'t work';
-$form->errorTemplate = '<span class="error">%s</span>';
+    $form->method = 'post';
+    $form->errorMessage = 'That doesn\'t work';
+    $form->errorTemplate = '<span class="error">%s</span>';
 
-// Set mail recipient and subject
-$form->mailer('to', 'example@example.com');
-$form->mailer('subject', 'Test message');
+    // Set mail recipient and subject
+    $form->mailer('to', 'example@example.com');
+    $form->mailer('subject', 'Test message');
 
-// Set mail headers
-$form->header('Reply-To', 'example@example.com');
+    // Set mail headers
+    $form->header('Reply-To', 'example@example.com');
 
-// Define form fields
-$form->field('fullname', [
-    'label' => 'Name',
-    'required' => true,
-    'error' => 'Please enter your name',
-]);
+    // Define form fields
+    $form->field('fullname', [
+        'label' => 'Name',
+        'required' => true,
+        'error' => 'Please enter your name',
+    ]);
 
-$form->field('email', [
-    'label' => 'Email',
-    'required' => true,
-    'error' => 'Please enter a valid email address',
-    'validate' => [
-        'type' => 'email',
-    ],
-]);
+    $form->field('email', [
+        'label' => 'Email',
+        'required' => true,
+        'error' => 'Please enter a valid email address',
+        'validate' => [
+            'type' => 'email',
+        ],
+    ]);
 
-// Check for form submission
-$form->submit();
+    // Check for form submission
+    $form->submit();
+
+    // Assign the form to a query variable for use in a template part
+    set_query_var('contact_form', $form);
+});
+~~~
+
+Display the form in a template part:
+
+~~~ php
+$form = get_query_var('contact_form');
 
 // Show form or success message
 if ($form->sent()) {
@@ -307,7 +320,7 @@ Note that the methods `enableReCaptcha` and `renderReCaptcha` exist for backward
 
 ### ReCaptcha v3
 
-Enable ReCaptcha v3:
+Note that a form with ReCaptcha v3 must be defined, and ReCaptcha v3 must be validated,on the `init` action before any headers are sent. Enable ReCaptcha v3:
 
 ~~~ php
 $form->enableReCaptcha3($site_key, $secret_key);
