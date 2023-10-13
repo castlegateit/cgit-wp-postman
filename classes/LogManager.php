@@ -195,6 +195,7 @@ class LogManager
             SELECT post_id, form_id
             FROM {$this->table}
             GROUP BY $groups
+            ORDER BY form_id ASC
         ");
     }
 
@@ -297,6 +298,7 @@ class LogManager
             SELECT *
             FROM {$this->table}
             WHERE $where
+            ORDER BY date ASC
         ");
 
         // Print CSV output
