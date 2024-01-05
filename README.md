@@ -332,6 +332,22 @@ The necessary scripts for ReCaptcha v3 will be enqueued automatically, so there 
 echo $form->error('recaptcha');
 ~~~
 
+## Cloudflare Turnstile ##
+
+Postman can check for bot submissions using [Turnstile](https://www.cloudflare.com/products/turnstile/).
+
+Enable Cloudflare Turnstile:
+
+~~~ php
+$form->enableTurnstile($site_key, $secret_key);
+~~~
+
+You can then output the Turnstile field and error message where you want them in your template:
+
+~~~ php
+echo $form->renderTurnstile();
+echo $form->error('cf-turnstile-response');
+~~~
 
 ## Logs ##
 

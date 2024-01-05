@@ -119,6 +119,13 @@ class Postman
     private $recaptcha = null;
 
     /**
+     * Turnstile class instance (if enabled)
+     *
+     * @var Turnstile|null
+     */
+    private ?Turnstile $turnstile = null;
+
+    /**
      * ReCaptcha 2 error message
      *
      * @var string
@@ -131,6 +138,13 @@ class Postman
      * @var string
      */
     private $recaptcha3ErrorMessage = 'An issue occurred during the validation process. Please try again.';
+
+    /**
+     * Turnstile error message
+     *
+     * @var string
+     */
+    private $turnstileErrorMessage = 'An issue occurred during the validation process. Please try again.';
 
     /**
      * Akismet class instance (if enabled)
@@ -352,6 +366,7 @@ class Postman
     {
         $this->validateAkismetConf();
         $this->validateReCaptchaConf();
+        $this->validateTurnstileConf();
 
         if (!$this->submitted()) {
             return false;
@@ -359,6 +374,13 @@ class Postman
 
         if ($this->hasReCaptcha()) {
             $this->field(ReCaptcha::FIELD_NAME, [
+                'required' => true,
+                'exclude' => true,
+            ]);
+        }
+
+        if ($this->hasTurnstile()) {
+            $this->field(Turnstile::FIELD_NAME, [
                 'required' => true,
                 'exclude' => true,
             ]);
@@ -500,6 +522,9 @@ class Postman
 
         // Check ReCaptcha response.
         $this->validateReCaptcha();
+
+        // Check Turnstile response.
+        $this->validateTurnstile();
 
         // Check for spam with Akismet (only if submission is valid).
         if (!$this->errors()) {
@@ -832,6 +857,98 @@ class Postman
 
         if ($this->recaptcha instanceof ReCaptcha3 && $this->recaptcha->active()) {
             return $this->recaptcha3ErrorMessage;
+        }
+
+        return null;
+    }
+
+    /**
+     * Enable Cloudflare Turnstile
+     *
+     * @param string|null $site_key
+     * @param string|null $secret_key
+     * @return void
+     */
+    public function enableTurnstile(?string $site_key = null, ?string $secret_key = null): void
+    {
+        if ($this->turnstile instanceof Turnstile) {
+            trigger_error('Turnstile already enabled', E_USER_ERROR);
+            return;
+        }
+
+        $this->turnstile = new Turnstile($site_key, $secret_key);
+    }
+
+    /**
+     * Is Cloudflare Turnstile enabled?
+     *
+     * @return bool
+     */
+    public function hasTurnstile(): bool
+    {
+        return $this->turnstile instanceof Turnstile &&
+            $this->turnstile->active();
+    }
+
+    /**
+     * Render Cloudflare Turnstile field
+     *
+     * @return string|null
+     */
+    public function renderTurnstile(): ?string
+    {
+        if ($this->turnstile instanceof Turnstile) {
+            if ($this->turnstile->active()) {
+                return $this->turnstile->render();
+            }
+
+            trigger_error('Turnstile keys missing');
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate Cloudflare  Turnstile response
+     *
+     * @return void
+     */
+    public function validateTurnstile(): void
+    {
+        if (!$this->hasTurnstile()) {
+            return;
+        }
+
+        $response = (string) $this->value(Turnstile::FIELD_NAME);
+
+        if ($this->turnstile->validate($response)) {
+            return;
+        }
+
+        $this->errors[Turnstile::FIELD_NAME] = $this->getTurnstileErrorMessage();
+    }
+
+    /**
+     * Validate Cloudflare Turnstile configuration
+     *
+     * @return void
+     */
+    private function validateTurnstileConf(): void
+    {
+        if ($this->turnstile instanceof Turnstile && !$this->turnstile->active()) {
+            trigger_error('Turnstile enabled but API key missing.', E_USER_ERROR);
+        }
+    }
+
+    /**
+     * Return Cloudflare Turnstile error message
+     *
+     * @return string|null
+     */
+    private function getTurnstileErrorMessage(): ?string
+    {
+        if ($this->turnstile instanceof Turnstile && $this->turnstile->active()) {
+            return $this->turnstileErrorMessage;
         }
 
         return null;
