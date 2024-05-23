@@ -338,6 +338,11 @@ class Postman
             $name = ReCaptcha::FIELD_NAME;
         }
 
+        // Make 'turnstile' an alias of the ReCaptcha field name.
+        if ($name === 'turnstile') {
+            $name = Turnstile::FIELD_NAME;
+        }
+
         $error = isset($this->errors[$name]) ? $this->errors[$name] : false;
         $template = $this->errorTemplate;
 
