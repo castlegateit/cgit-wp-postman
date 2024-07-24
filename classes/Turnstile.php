@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace Castlegate\Postman;
 
-use Symfony\Component\HttpClient\Psr18Client;
-use Turnstile\Client\Client;
-use Turnstile\Error\Code;
-use Turnstile\Turnstile as TurnstileClient;
-
-
 class Turnstile
 {
     /**
@@ -18,6 +12,13 @@ class Turnstile
      * @var string
      */
     public const FIELD_NAME = 'cf-turnstile-response';
+
+    /**
+     * Cloudflare Turnstile Endpoint URL
+     *
+     * @var string
+     */
+    public const URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
     /**
      * Site key
@@ -183,18 +184,43 @@ class Turnstile
             return null;
         }
 
-        $remote_ip = $_SERVER['REMOTE_ADDR'] ?? null;
         $secretKey = $this->secretKey ?? '';
 
-        $turnstile = new TurnstileClient(
-            new Client(
-                new Psr18Client()
-            ),
-            $secretKey,
-        );
+        $url = self::URL;
+        $data = [
+            'secret' => $secretKey,
+            'response' => $response,
+            'remoteip' => self::getIp(),
+        ];
 
-        $result = $turnstile->verify($response, $remote_ip);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
 
-        return (bool) $result->success;
+        $raw_response = curl_exec($ch);
+        curl_close($ch);
+
+        $result = json_decode($raw_response, true);
+
+        return isset($result['success']) && $result['success'];
+    }
+
+    /**
+     * Get IP address
+     *
+     * @return mixed
+     */
+    public static function getIp() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            // IP from shared internet
+            return $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            // IP passed from proxy
+            return $_SERVER['HTTP_X_FORWARDED_FOR'];
+        }
+
+        // Regular IP address
+        return $_SERVER['REMOTE_ADDR'];
     }
 }
