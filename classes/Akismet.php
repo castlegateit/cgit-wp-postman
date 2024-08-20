@@ -249,8 +249,8 @@ class Akismet
     {
         global $wp_version;
 
-        $plugin_data = get_plugin_data(CGIT_POSTMAN_PLUGIN);
-        $plugin_version = $plugin_data['Version'] ?? '3.1.2';
+        $plugin_data = get_plugin_data(CGIT_WP_POSTMAN_PLUGIN_FILE);
+        $plugin_version = $plugin_data['Version'] ?? 'Latest';
 
         return "WordPress/$wp_version | Castlegate Postman/$plugin_version";
     }

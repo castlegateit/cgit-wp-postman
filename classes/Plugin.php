@@ -32,7 +32,7 @@ class Plugin
 
         // Create database table for form submission logs
         register_activation_hook(
-            CGIT_POSTMAN_PLUGIN,
+            CGIT_WP_POSTMAN_PLUGIN_FILE,
             [$this, 'createLogTable']
         );
 
