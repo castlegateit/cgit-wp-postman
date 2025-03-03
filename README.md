@@ -210,8 +210,11 @@ if ($form->sent()) {
         // Submission has not passed Akismet's spam check?
         echo $form->error('akismet');
 
-        // Submission has not passed ReCaptcha?
-        echo $form->error('recaptcha');
+        // Submission has not passed ReCaptcha 2?
+        echo $form->error('recaptcha2');
+
+        // Submission has not passed ReCaptcha 3?
+        echo $form->error('recaptcha3');
     }
 
     ?>
@@ -312,7 +315,7 @@ You can then output the ReCaptcha field and error message where you want them in
 
 ~~~ php
 echo $form->renderReCaptcha2();
-echo $form->error('recaptcha');
+echo $form->error('recaptcha2');
 ~~~
 
 Note that the methods `enableReCaptcha` and `renderReCaptcha` exist for backward compatibility with previous versions of Postman. These methods are aliases of the v2 methods and are now deprecated. They should be replaced with the new version-specific methods.
@@ -329,7 +332,7 @@ $form->enableReCaptcha3($site_key, $secret_key);
 The necessary scripts for ReCaptcha v3 will be enqueued automatically, so there is no need to render any HTML. However, you will need to display the error message somewhere in or near your form:
 
 ~~~ php
-echo $form->error('recaptcha');
+echo $form->error('recaptcha3');
 ~~~
 
 ## Cloudflare Turnstile ##
@@ -346,7 +349,7 @@ You can then output the Turnstile field and error message where you want them in
 
 ~~~ php
 echo $form->renderTurnstile();
-echo $form->error('cf-turnstile-response');
+echo $form->error('turnstile');
 ~~~
 
 ## Logs ##

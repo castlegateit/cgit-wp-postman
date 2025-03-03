@@ -7,8 +7,5 @@
         "files": [
             "compat/Postman.php"
         ]
-    },
-    "require": {
-        "google/recaptcha": "^1.2"
     }
 }

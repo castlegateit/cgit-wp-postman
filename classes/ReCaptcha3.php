@@ -4,48 +4,73 @@ declare(strict_types=1);
 
 namespace Castlegate\Postman;
 
-class ReCaptcha3 extends ReCaptcha
+class ReCaptcha3 extends AbstractCaptcha
 {
-    /**
-     * Script handle
-     *
-     * @var string
-     */
-    public const SCRIPT_HANDLE = 'postman-recaptcha-v3';
-
-    /**
-     * API script handle
-     *
-     * @var string
-     */
+    public const FIELD_NAME = 'g-recaptcha-response';
+    public const API_ENDPOINT_URL = 'https://www.google.com/recaptcha/api/siteverify';
+    public const API_SCRIPT_URL = 'https://www.google.com/recaptcha/api.js';
     public const API_SCRIPT_HANDLE = 'postman-recaptcha-api-v3';
+    public const PLUGIN_SCRIPT_HANDLE = 'postman-recaptcha-v3';
+
+    public const SITE_KEY_CONSTANTS = [
+        'RECAPTCHA_3_SITE_KEY',
+        'RECAPTCHA_SITE_KEY',
+    ];
+
+    public const SECRET_KEY_CONSTANTS = [
+        'RECAPTCHA_3_SECRET_KEY',
+        'RECAPTCHA_SECRET_KEY',
+    ];
 
     /**
-     * List of form IDs by site
+     * List of form IDs by site key
      *
      * @var array
      */
     private static $forms = [];
 
     /**
-     * Initialization
+     * Construct
      *
+     * @param string|null $siteKey
+     * @param string|null $secretKey
      * @return void
      */
-    protected function init(): void
-    {
-        $script_url = path_join(plugin_dir_url(CGIT_WP_POSTMAN_PLUGIN_FILE), 'assets/js/recaptcha-v3.js');
-        $script_version = get_plugin_data(CGIT_WP_POSTMAN_PLUGIN_FILE)['Version'] ?? null;
+    public function __construct(
+        public ?string $siteKey = null,
+        public ?string $secretKey = null
+    ) {
+        $this->validateConstants();
+        $this->validateKeys();
 
-        $api_script_url = 'https://www.google.com/recaptcha/api.js';
-        $api_script_version = null;
+        // API script URL with site key
+        $api_script_url = static::API_SCRIPT_URL;
 
         if ($this->siteKey) {
-            $api_script_url = add_query_arg('render', $this->siteKey, $api_script_url);
+            $api_script_url = add_query_arg([
+                'render' => $this->siteKey,
+            ], $api_script_url);
         }
 
-        wp_register_script(self::API_SCRIPT_HANDLE, $api_script_url, [], $api_script_version);
-        wp_register_script(self::SCRIPT_HANDLE, $script_url, [self::API_SCRIPT_HANDLE], $script_version);
+        // Register API script
+        wp_register_script(
+            handle: static::API_SCRIPT_HANDLE,
+            src: $api_script_url,
+            ver: null
+        );
+
+        // Register plugin script
+        wp_register_script(
+            handle: static::PLUGIN_SCRIPT_HANDLE,
+            src: rtrim(plugin_dir_url(CGIT_WP_POSTMAN_PLUGIN_FILE), '/') . '/assets/js/recaptcha-v3.js',
+            deps: [
+                static::API_SCRIPT_HANDLE,
+            ],
+            ver: CGIT_WP_POSTMAN_VERSION
+        );
+
+        // Enqueue scripts
+        add_action('wp_enqueue_scripts', [$this, 'enqueueScripts']);
     }
 
     /**
@@ -55,45 +80,18 @@ class ReCaptcha3 extends ReCaptcha
      */
     public function enqueueScripts(): void
     {
-        wp_enqueue_script(self::SCRIPT_HANDLE);
+        wp_enqueue_script(static::API_SCRIPT_HANDLE);
+        wp_enqueue_script(static::PLUGIN_SCRIPT_HANDLE);
     }
 
     /**
-     * Sanitize site key
+     * Render field
      *
-     * @param string|null $key
      * @return string|null
      */
-    protected static function sanitizeSiteKey(string $key = null): ?string
+    public function render(): ?string
     {
-        if ($key) {
-            return $key;
-        }
-
-        if (defined('RECAPTCHA_3_SITE_KEY') && RECAPTCHA_3_SITE_KEY) {
-            return RECAPTCHA_3_SITE_KEY;
-        }
-
-        return null;
-    }
-
-    /**
-     * Sanitize secret key
-     *
-     * @param string|null $key
-     * @return string|null
-     */
-    protected static function sanitizeSecretKey(string $key = null): ?string
-    {
-        if ($key) {
-            return $key;
-        }
-
-        if (defined('RECAPTCHA_3_SECRET_KEY') && RECAPTCHA_3_SECRET_KEY) {
-            return RECAPTCHA_3_SECRET_KEY;
-        }
-
-        return null;
+        return '';
     }
 
     /**
@@ -109,15 +107,20 @@ class ReCaptcha3 extends ReCaptcha
      */
     public function addForm(string $form_id): void
     {
-        if (!isset(self::$forms[$this->siteKey]) || !is_array(self::$forms[$this->siteKey])) {
-            self::$forms[$this->siteKey] = [];
+        $forms = static::$forms;
+        $key = $this->siteKey;
+
+        if (!isset($forms[$key]) || !is_array($forms[$key])) {
+            $forms[$key] = [];
         }
 
-        self::$forms[$this->siteKey][] = $form_id;
-        self::$forms[$this->siteKey] = array_unique(self::$forms[$this->siteKey]);
+        $forms[$key][] = $form_id;
+        $forms[$key] = array_unique($forms[$key]);
 
-        sort(self::$forms[$this->siteKey]);
-        ksort(self::$forms);
+        sort($forms[$key]);
+        ksort($forms);
+
+        static::$forms = $forms;
     }
 
     /**
@@ -131,8 +134,8 @@ class ReCaptcha3 extends ReCaptcha
      */
     public function embedForms(): void
     {
-        wp_localize_script(self::SCRIPT_HANDLE, 'postman_recaptcha_api_v3', [
-            'forms' => self::$forms,
+        wp_localize_script(static::PLUGIN_SCRIPT_HANDLE, 'postman_recaptcha_api_v3', [
+            'forms' => static::$forms,
         ]);
     }
 }

@@ -11,10 +11,6 @@ class ComposerStaticInit59bb732cfef5e10603b505930ea1b359
     );
 
     public static $prefixLengthsPsr4 = array (
-        'R' => 
-        array (
-            'ReCaptcha\\' => 10,
-        ),
         'C' => 
         array (
             'Castlegate\\Postman\\' => 19,
@@ -22,10 +18,6 @@ class ComposerStaticInit59bb732cfef5e10603b505930ea1b359
     );
 
     public static $prefixDirsPsr4 = array (
-        'ReCaptcha\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha',
-        ),
         'Castlegate\\Postman\\' => 
         array (
             0 => __DIR__ . '/../..' . '/classes',

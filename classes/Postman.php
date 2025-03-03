@@ -7,6 +7,11 @@ namespace Castlegate\Postman;
  */
 class Postman
 {
+    use PostmanAkismet;
+    use PostmanReCaptcha2;
+    use PostmanReCaptcha3;
+    use PostmanTurnstile;
+
     /**
      * Form ID
      *
@@ -110,76 +115,6 @@ class Postman
      * @var array
      */
     private $data = [];
-
-    /**
-     * ReCaptcha class instance (if enabled)
-     *
-     * @var ReCaptcha|null
-     */
-    private $recaptcha = null;
-
-    /**
-     * Turnstile class instance (if enabled)
-     *
-     * @var Turnstile|null
-     */
-    private ?Turnstile $turnstile = null;
-
-    /**
-     * ReCaptcha 2 error message
-     *
-     * @var string
-     */
-    private $recaptcha2ErrorMessage = 'Please confirm you are not a robot';
-
-    /**
-     * ReCaptcha 3 error message
-     *
-     * @var string
-     */
-    private $recaptcha3ErrorMessage = 'An issue occurred during the validation process. Please try again.';
-
-    /**
-     * Turnstile error message
-     *
-     * @var string
-     */
-    private $turnstileErrorMessage = 'An issue occurred during the validation process. Please try again.';
-
-    /**
-     * Akismet class instance (if enabled)
-     *
-     * @var Akismet|null
-     */
-    private $akismet = null;
-
-    /**
-     * Akismet validation type
-     *
-     * Must be one of comment, forum-post, reply, blog-post, contact-form,
-     * signup, or message.
-     *
-     * @var string|null
-     */
-    private $akismetType = null;
-
-    /**
-     * Akismet fields
-     *
-     * Akistmet fields (keys) and their corresponding Postman field names
-     * (values). Multiple Postman fields can be specified as an array of field
-     * names. In that case, the field values will be concatenated.
-     *
-     * @var array
-     */
-    private $akismetFields = [];
-
-    /**
-     * Akismet error message
-     *
-     * @var string
-     */
-    public $akismetErrorMessage = 'Your message appears to be spam. Please check it and try again.';
 
     /**
      * Construct
@@ -333,15 +268,14 @@ class Postman
      */
     public function error($name, $before = '', $after = '')
     {
-        // Make 'recaptcha' an alias of the ReCaptcha field name.
-        if ($name === 'recaptcha') {
-            $name = ReCaptcha::FIELD_NAME;
-        }
-
-        // Make 'turnstile' an alias of the ReCaptcha field name.
-        if ($name === 'turnstile') {
-            $name = Turnstile::FIELD_NAME;
-        }
+        // Aliases
+        $name = match ($name) {
+            'recaptcha' => ReCaptcha2::FIELD_NAME,
+            'recaptcha2' => ReCaptcha2::FIELD_NAME,
+            'recaptcha3' => ReCaptcha3::FIELD_NAME,
+            'turnstile' => Turnstile::FIELD_NAME,
+            default => $name,
+        };
 
         $error = isset($this->errors[$name]) ? $this->errors[$name] : false;
         $template = $this->errorTemplate;
@@ -369,16 +303,17 @@ class Postman
      */
     public function submit()
     {
-        $this->validateAkismetConf();
-        $this->validateReCaptchaConf();
+        $this->validateReCaptcha2Conf();
+        $this->validateReCaptcha3Conf();
         $this->validateTurnstileConf();
+        $this->validateAkismetConf();
 
         if (!$this->submitted()) {
             return false;
         }
 
-        if ($this->hasReCaptcha()) {
-            $this->field(ReCaptcha::FIELD_NAME, [
+        if ($this->hasReCaptcha2()) {
+            $this->field(ReCaptcha2::FIELD_NAME, [
                 'required' => true,
                 'exclude' => true,
             ]);
@@ -525,13 +460,12 @@ class Postman
             $this->validate($field);
         }
 
-        // Check ReCaptcha response.
-        $this->validateReCaptcha();
-
-        // Check Turnstile response.
+        // Check ReCaptcha/Turnstile response
+        $this->validateReCaptcha2();
+        $this->validateReCaptcha3();
         $this->validateTurnstile();
 
-        // Check for spam with Akismet (only if submission is valid).
+        // Check for spam with Akismet (only if submission is valid)
         if (!$this->errors()) {
             $this->validateAkismet();
         }
@@ -730,80 +664,25 @@ class Postman
     /**
      * Enable ReCaptcha 2
      *
-     * @param string|null $site_key
-     * @param string|null $secret_key
-     * @return void
-     */
-    public function enableReCaptcha2(string $site_key = null, string $secret_key = null): void
-    {
-        if ($this->recaptcha instanceof ReCaptcha) {
-            trigger_error('ReCaptcha already enabled', E_USER_ERROR);
-            return;
-        }
-
-        $this->recaptcha = new ReCaptcha2($site_key, $secret_key);
-    }
-
-    /**
-     * Enable ReCaptcha 3
-     *
-     * @param string|null $site_key
-     * @param string|null $secret_key
-     * @return void
-     */
-    public function enableReCaptcha3(string $site_key = null, string $secret_key = null): void
-    {
-        if ($this->recaptcha instanceof ReCaptcha) {
-            trigger_error('ReCaptcha already enabled', E_USER_ERROR);
-            return;
-        }
-
-        $this->recaptcha = new ReCaptcha3($site_key, $secret_key);
-
-        $this->recaptcha->addForm($this->id);
-        $this->recaptcha->embedForms();
-    }
-
-    /**
-     * Enable ReCaptcha 2
-     *
      * @deprecated
      * @param string|null $site_key
      * @param string|null $secret_key
      * @return void
      */
-    public function enableReCaptcha(string $site_key = null, string $secret_key = null): void
+    public function enableReCaptcha(?string $site_key = null, ?string $secret_key = null): void
     {
         $this->enableReCaptcha2($site_key, $secret_key);
     }
 
     /**
-     * Is ReCaptcha enabled?
+     * Is ReCaptcha 2 enabled?
      *
+     * @deprecated
      * @return bool
      */
     public function hasReCaptcha(): bool
     {
-        return $this->recaptcha instanceof ReCaptcha &&
-            $this->recaptcha->active();
-    }
-
-    /**
-     * Render ReCaptcha 2 field
-     *
-     * @return string|null
-     */
-    public function renderReCaptcha2(): ?string
-    {
-        if ($this->recaptcha instanceof ReCaptcha2) {
-            if ($this->recaptcha->active()) {
-                return $this->recaptcha->render();
-            }
-
-            trigger_error('ReCaptcha keys missing');
-        }
-
-        return null;
+        return $this->hasReCaptcha2();
     }
 
     /**
@@ -815,289 +694,6 @@ class Postman
     public function renderReCaptcha(): ?string
     {
         return $this->renderReCaptcha2();
-    }
-
-    /**
-     * Validate ReCaptcha response
-     *
-     * @return void
-     */
-    public function validateReCaptcha(): void
-    {
-        if (!$this->hasReCaptcha()) {
-            return;
-        }
-
-        $response = (string) $this->value(ReCaptcha::FIELD_NAME);
-
-        if ($this->recaptcha->validate($response)) {
-            return;
-        }
-
-        $this->errors[ReCaptcha::FIELD_NAME] = $this->getReCaptchaErrorMessage();
-    }
-
-    /**
-     * Validate ReCaptcha configuration
-     *
-     * @return void
-     */
-    private function validateReCaptchaConf(): void
-    {
-        if ($this->recaptcha instanceof ReCaptcha && !$this->recaptcha->active()) {
-            trigger_error('ReCaptcha enabled but API key missing.', E_USER_ERROR);
-        }
-    }
-
-    /**
-     * Return ReCaptcha error message
-     *
-     * @return string|null
-     */
-    private function getReCaptchaErrorMessage(): ?string
-    {
-        if ($this->recaptcha instanceof ReCaptcha2 && $this->recaptcha->active()) {
-            return $this->recaptcha2ErrorMessage;
-        }
-
-        if ($this->recaptcha instanceof ReCaptcha3 && $this->recaptcha->active()) {
-            return $this->recaptcha3ErrorMessage;
-        }
-
-        return null;
-    }
-
-    /**
-     * Enable Cloudflare Turnstile
-     *
-     * @param string|null $site_key
-     * @param string|null $secret_key
-     * @return void
-     */
-    public function enableTurnstile(?string $site_key = null, ?string $secret_key = null): void
-    {
-        if ($this->turnstile instanceof Turnstile) {
-            trigger_error('Turnstile already enabled', E_USER_ERROR);
-            return;
-        }
-
-        $this->turnstile = new Turnstile($site_key, $secret_key);
-    }
-
-    /**
-     * Is Cloudflare Turnstile enabled?
-     *
-     * @return bool
-     */
-    public function hasTurnstile(): bool
-    {
-        return $this->turnstile instanceof Turnstile &&
-            $this->turnstile->active();
-    }
-
-    /**
-     * Render Cloudflare Turnstile field
-     *
-     * @return string|null
-     */
-    public function renderTurnstile(): ?string
-    {
-        if ($this->turnstile instanceof Turnstile) {
-            if ($this->turnstile->active()) {
-                return $this->turnstile->render();
-            }
-
-            trigger_error('Turnstile keys missing');
-        }
-
-        return null;
-    }
-
-    /**
-     * Validate Cloudflare  Turnstile response
-     *
-     * @return void
-     */
-    public function validateTurnstile(): void
-    {
-        if (!$this->hasTurnstile()) {
-            return;
-        }
-
-        $response = (string) $this->value(Turnstile::FIELD_NAME);
-
-        if ($this->turnstile->validate($response)) {
-            return;
-        }
-
-        $this->errors[Turnstile::FIELD_NAME] = $this->getTurnstileErrorMessage();
-    }
-
-    /**
-     * Validate Cloudflare Turnstile configuration
-     *
-     * @return void
-     */
-    private function validateTurnstileConf(): void
-    {
-        if ($this->turnstile instanceof Turnstile && !$this->turnstile->active()) {
-            trigger_error('Turnstile enabled but API key missing.', E_USER_ERROR);
-        }
-    }
-
-    /**
-     * Return Cloudflare Turnstile error message
-     *
-     * @return string|null
-     */
-    private function getTurnstileErrorMessage(): ?string
-    {
-        if ($this->turnstile instanceof Turnstile && $this->turnstile->active()) {
-            return $this->turnstileErrorMessage;
-        }
-
-        return null;
-    }
-
-    /**
-     * Enable Akismet validation
-     *
-     * Enable Akismet validation for this form. The first parameter sets the
-     * Akismet comment type and must be one of: forum-post, reply, blog-post,
-     * contact-form, signup, or message.
-     *
-     * The second parameter maps the Postman fields to valid Akismet fields:
-     * comment_author, comment_author_email, comment_author_url,
-     * comment_content. Multiple Postman field names can be specified as an
-     * array. If no map is provided, all Postman fields will be combined and
-     * submitted as comment_content. But you probably don't really want that to
-     * happen.
-     *
-     * See <https://akismet.com/development/api/>.
-     *
-     * @param string $type Akismet comment type.
-     * @param array $map Array that maps Postman fields to Akismet fields.
-     * @return void
-     */
-    public function enableAkismet(string $type, array $fields = []): void
-    {
-        $this->akismetType = $type;
-        $this->akismetFields = $fields;
-
-        $this->akismet = new Akismet();
-    }
-
-    /**
-     * Is Akismet enabled?
-     *
-     * @return bool
-     */
-    public function hasAkismet(): bool
-    {
-        return $this->akismet instanceof Akismet;
-    }
-
-    /**
-     * Validate form submission with Akismet
-     *
-     * @return void
-     */
-    private function validateAkismet(): void
-    {
-        // Akismet is not enabled? Skip validation.
-        if (!$this->hasAkismet()) {
-            return;
-        }
-
-        // Set Akismet validation parameters.
-        $this->akismet->setAkismetArgs($this->getAkismetFields());
-
-        // Akismet validation returned true. Form submission is not spam.
-        if ($this->akismet->validate()) {
-            return;
-        }
-
-        // Akismet validation returned false. Looks like spam :(
-        $this->errors['akismet'] = $this->akismetErrorMessage;
-    }
-
-    /**
-     * Return Akismet field values based on Postman field values
-     *
-     * Note that this simply maps named Postman fields to the keys set in the
-     * array of Akismet fields. It does not check that the Akismet field keys
-     * themselves are valid.
-     *
-     * @return array
-     */
-    private function getAkismetFields(): array
-    {
-        $values = [];
-
-        foreach ($this->akismetFields as $akismet_key => $postman_key) {
-            $values[$akismet_key] = $this->getFlatValue($postman_key, true);
-        }
-
-        return array_merge($values, [
-            'comment_type' => $this->akismetType,
-        ]);
-    }
-
-    /**
-     * Return string value from field name(s)
-     *
-     * Multiple fields are combined into a single string.
-     *
-     * @param mixed $field
-     * @param bool $strict
-     * @return string|null
-     */
-    private function getFlatValue($field, bool $strict = false): ?string
-    {
-        // Single field name? Return field value.
-        if (is_string($field)) {
-            // Strict mode (field must exist)?
-            if ($strict && !array_key_exists($field, $this->fields)) {
-                trigger_error("Unknown Postman field \"$field\"", E_USER_NOTICE);
-                return null;
-            }
-
-            return (string) $this->value($field);
-        }
-
-        // Array of field names? Return concated values of all fields.
-        if (is_array($field)) {
-            $values = [];
-
-            foreach ($field as $sub_field) {
-                $values[] = $this->getFlatValue($sub_field, $strict);
-            }
-
-            return implode(' ', $values);
-        }
-
-        // Not a string or an array of strings? Cannot return value.
-        return null;
-    }
-
-    /**
-     * Validate Akismet configuration
-     *
-     * @return void
-     */
-    private function validateAkismetConf(): void
-    {
-        if (!($this->akismet instanceof Akismet)) {
-            return;
-        }
-
-        if (!$this->akismet->active()) {
-            trigger_error('Akismet enabled but API key missing.', E_USER_ERROR);
-        }
-
-        if (!Akismet::verify()) {
-            trigger_error('Akismet enabled but API key invalid.', E_USER_ERROR);
-        }
     }
 
     /**
