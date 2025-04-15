@@ -73,6 +73,10 @@ class RemoteRequest
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
+        if (!static::isSecureConnection()) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        }
+
         if ($this->data) {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($this->data));
@@ -112,5 +116,17 @@ class RemoteRequest
         }
 
         return null;
+    }
+
+    /**
+     * Current connection uses SSL?
+     *
+     * @return bool
+     */
+    public static function isSecureConnection(): bool
+    {
+        return strtolower((string) ($_SERVER['HTTPS'] ?? '')) === 'on' ||
+            strtolower((string) ($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '')) === 'on' ||
+            strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
     }
 }
