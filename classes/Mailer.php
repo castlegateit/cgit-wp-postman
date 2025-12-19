@@ -113,7 +113,7 @@ class Mailer
      * Assemble headers from associative array and $from property and return
      * correctly formatted value.
      *
-     * @return void
+     * @return string
      */
     protected function getHeaders()
     {
@@ -148,7 +148,7 @@ class Mailer
      * Print email data instead of sending the message for debugging. Useful if
      * you can't send email or don't want a very full inbox :)
      *
-     * @return void
+     * @return bool
      */
     private function dump($to, $subject, $content, $headers)
     {
